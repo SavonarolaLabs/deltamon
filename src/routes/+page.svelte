@@ -27,9 +27,15 @@
 	}
 </script>
 
-<div class="main h-full" style="background-image: url({base}/bg.png);">
+<div
+	class="main h-full flex flex-col"
+	style="background-image: url({base}/bg.png);"
+>
 	<Navigation />
-	<div class="h-full w-full flex flex-col items-center justify-center gap-6">
+	<div
+		class="h-full w-full flex flex-col items-center justify-center gap-6"
+		style=""
+	>
 		<!-- Display the number of monsters in each dungeon -->
 		<div class="dungeons fixed left-2 top-16">
 			<div class="flex flex-col gap-4">
