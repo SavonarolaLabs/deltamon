@@ -48,16 +48,11 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
-	class="border-gray-300 py-4 text-center"
+	class="border-gray-300 py-4 text-center border border-slate-400 rounded-md bg-white"
 	class:cursor-pointer={!$click_mode}
 	class:cursor-not-allowed={$click_mode == CLICK_MODE_ATTACK &&
 		slot.creature?.playerId == game.activeCreature?.playerId}
 	class:selected={slot.creature?.isSelected}
-	style={isTopRow && (index == 0 || index == 3)
-		? "margin-bottom:40px;"
-		: !isTopRow && (index == 0 || index == 3)
-			? "margin-top:40px;"
-			: ""}
 	on:click={handleClick}
 >
 	{#if slot.creature}

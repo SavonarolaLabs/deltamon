@@ -26,7 +26,7 @@
 				selected_creature.set(null);
 			}
 		} else if (event.key === " ") {
-			event.preventDefault(); // Prevent scrolling when space is pressed
+			event.preventDefault();
 			if (game.gameOver || !game.currentRound) {
 				startMatch(game);
 				logEvent("Match started.");
@@ -48,9 +48,8 @@
 		scrollToBottom();
 	}
 
-	// Scrolls the log container to the bottom
 	async function scrollToBottom() {
-		await tick(); // Wait for DOM updates
+		await tick();
 		if (logContainer) {
 			logContainer.scrollTop = logContainer.scrollHeight;
 		}
@@ -82,7 +81,6 @@
 	}
 </script>
 
-<Navigation></Navigation>
 <svelte:window
 	on:keydown={handleKeyDown}
 	on:mousemove={() => {
@@ -90,54 +88,87 @@
 	}}
 />
 
-<div class="flex flex-col">
-	<div
-		class="fixed top-12 left-2 bg-black bg-opacity-70 text-white p-2 w-32 z-10 flex flex-col"
-	>
-		<p>Round: {game.currentRound}</p>
-		<p>Game Over: {game.gameOver ? "Yes" : "No"}</p>
-		{#if game.winner}
-			<p>Winner: {game.winner.name}</p>
-		{:else}
-			<p>Winner: TBD</p>
-		{/if}
-	</div>
+<div
+	class="h-full flex flex-col bg-arena"
+	style="background-image:url('https://i.pinimg.com/originals/18/2a/a3/182aa350a17925b3b228fe9b760da4c7.jpg')"
+>
+	<Navigation></Navigation>
 
-	<main class="flex flex-col justify-center items-center text-sm">
-		<!-- Game slots -->
-		<div class="flex items-end gap-4 mt-8">
-			{#each game.slots.slice(0, 4) as slot, index}
-				<SlotComponent
-					{slot}
-					{index}
-					isTopRow={true}
-					on:childUpdate={handleChildUpdate}
-				/>
+	<div class="flex flex-col">
+		<div
+			class="fixed top-12 left-2 bg-black bg-opacity-70 text-white p-2 w-32 z-10 flex flex-col"
+		>
+			<p>Round: {game.currentRound}</p>
+			<p>Game Over: {game.gameOver ? "Yes" : "No"}</p>
+			{#if game.winner}
+				<p>Winner: {game.winner.name}</p>
+			{:else}
+				<p>Winner: TBD</p>
+			{/if}
+		</div>
+
+		<main
+			class="flex justify-center items-center text-sm mt-8 justify-around"
+		>
+			<!-- Left side: 6 creatures -->
+			<div class="flex flex-col gap-1">
+				{#each [0, 2, 4] as rowStart}
+					<div class="flex gap-1">
+						<SlotComponent
+							slot={game.slots[rowStart]}
+							index={rowStart}
+							isTopRow={true}
+							on:childUpdate={handleChildUpdate}
+						/>
+						<SlotComponent
+							slot={game.slots[rowStart + 1]}
+							index={rowStart + 1}
+							isTopRow={true}
+							on:childUpdate={handleChildUpdate}
+						/>
+					</div>
+				{/each}
+			</div>
+
+			<!-- Right side: 6 creatures -->
+			<div class="flex flex-col gap-1">
+				{#each [6, 8, 10] as rowStart}
+					<div class="flex gap-1">
+						<SlotComponent
+							slot={game.slots[rowStart]}
+							index={rowStart}
+							isTopRow={true}
+							on:childUpdate={handleChildUpdate}
+						/>
+						<SlotComponent
+							slot={game.slots[rowStart + 1]}
+							index={rowStart + 1}
+							isTopRow={true}
+							on:childUpdate={handleChildUpdate}
+						/>
+					</div>
+				{/each}
+			</div>
+		</main>
+
+		<!-- Game Log -->
+		<div
+			bind:this={logContainer}
+			class="fixed bottom-0 w-full bg-black bg-opacity-80 text-white p-4 max-h-40 overflow-y-auto"
+		>
+			{#each logs as log}
+				<p>{log}</p>
 			{/each}
 		</div>
 
-		<div class="flex items-start gap-4 mt-14">
-			{#each game.slots.slice(4, 8) as slot, index}
-				<SlotComponent
-					{slot}
-					{index}
-					isTopRow={false}
-					on:childUpdate={handleChildUpdate}
-				/>
-			{/each}
-		</div>
-	</main>
-
-	<!-- Game Log -->
-	<div
-		bind:this={logContainer}
-		class="fixed bottom-0 w-full bg-black bg-opacity-80 text-white p-4 max-h-40 overflow-y-auto"
-	>
-		{#each logs as log}
-			<p>{log}</p>
-		{/each}
+		<!-- Hero Panel -->
+		<BattleCreaturePanel />
 	</div>
-
-	<!-- Hero Panel -->
-	<BattleCreaturePanel />
 </div>
+
+<style>
+	.bg-arena {
+		background-position: center;
+		background-size: cover;
+	}
+</style>
