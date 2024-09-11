@@ -15,16 +15,26 @@
 
 	let logs: string[] = [];
 	let logContainer: HTMLDivElement;
+	let cursorStyle = "default";
+
+	function updateCursor() {
+		document.body.style.cursor =
+			$click_mode === CLICK_MODE_ATTACK
+				? `url(${base}/cursor/sword.cur), auto`
+				: "default";
+	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.key.toLowerCase() === "a") {
 			click_mode.set(CLICK_MODE_ATTACK);
+			updateCursor();
 		} else if (event.key === "Escape") {
 			if ($click_mode == CLICK_MODE_ATTACK) {
 				click_mode.set(0);
 			} else {
 				selected_creature.set(null);
 			}
+			updateCursor();
 		} else if (event.key === " ") {
 			event.preventDefault();
 			if (game.gameOver || !game.currentRound) {
@@ -55,18 +65,8 @@
 		}
 	}
 
-	let cursorStyle = "default";
-
-	$: {
-		if ($click_mode === CLICK_MODE_ATTACK) {
-			cursorStyle = `url(${base}/cursor/sword.cur), auto`;
-		} else {
-			cursorStyle = "default";
-		}
-	}
-
 	onMount(() => {
-		document.body.style.cursor = cursorStyle;
+		updateCursor();
 		startMatch(game);
 		game.slots = game.slots;
 	});
@@ -77,18 +77,14 @@
 			const sourceId = game.activeCreature?.bcId!;
 			attack(game, sourceId, msg.targetId);
 			click_mode.set(0);
+			updateCursor();
 			endTurn(game);
 			game.slots = game.slots;
 		}
 	}
 </script>
 
-<svelte:window
-	on:keydown={handleKeyDown}
-	on:mousemove={() => {
-		document.body.style.cursor = cursorStyle;
-	}}
-/>
+<svelte:window on:keydown={handleKeyDown} />
 
 <div
 	class="h-full flex flex-col bg-arena"
