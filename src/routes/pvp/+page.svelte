@@ -67,6 +67,8 @@
 
 	onMount(() => {
 		document.body.style.cursor = cursorStyle;
+		startMatch(game);
+		game.slots = game.slots;
 	});
 
 	function handleChildUpdate(event: CustomEvent) {
@@ -92,7 +94,9 @@
 	class="h-full flex flex-col bg-arena"
 	style="background-image:url('https://i.pinimg.com/originals/18/2a/a3/182aa350a17925b3b228fe9b760da4c7.jpg')"
 >
-	<Navigation></Navigation>
+	<div class="w-full fixed">
+		<Navigation></Navigation>
+	</div>
 
 	<div class="h-full flex flex-col justify-center">
 		<div
@@ -111,9 +115,9 @@
 			class="flex justify-center items-center text-sm mt-8 justify-around"
 		>
 			<!-- Left side: 6 creatures -->
-			<div class="flex flex-col gap-1">
+			<div class="flex flex-col gap-2">
 				{#each [0, 2, 4] as rowStart}
-					<div class="flex gap-1">
+					<div class="flex gap-2">
 						<SlotComponent
 							slot={game.slots[rowStart]}
 							index={rowStart}
@@ -131,9 +135,9 @@
 			</div>
 
 			<!-- Right side: 6 creatures -->
-			<div class="flex flex-col gap-1">
+			<div class="flex flex-col gap-2">
 				{#each [6, 8, 10] as rowStart}
-					<div class="flex gap-1">
+					<div class="flex gap-2">
 						<SlotComponent
 							slot={game.slots[rowStart]}
 							index={rowStart}

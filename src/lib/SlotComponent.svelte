@@ -53,6 +53,7 @@
 	class:cursor-not-allowed={$click_mode == CLICK_MODE_ATTACK &&
 		slot.creature?.playerId == game.activeCreature?.playerId}
 	class:selected={slot.creature?.isSelected}
+	class:active={slot.creature?.isActive}
 	on:click={handleClick}
 >
 	{#if slot.creature}
@@ -62,21 +63,11 @@
 			alt={slot.creature.name}
 			width="190"
 		/>
-		<div class="w-full px-10">
-			{#if slot.creature.isActive}
-				<div class="border border-black"></div>
-			{/if}
-		</div>
 
 		<p>
 			{#if slot.creature.canActThisRound}●{/if} HP {slot.creature
 				.hp}/{slot.creature.maxHp}
 		</p>
-		<!-- <div class="w-full flex justify-between px-10">
-			<p>A {slot.creature.attack}</p>
-			<p>D {slot.creature.defense}</p>
-			<p>I {slot.creature.initiative}</p>
-		</div> -->
 	{:else}
 		<p>No creature in this slot</p>
 	{/if}
@@ -86,5 +77,23 @@
 	.selected {
 		border: 2px solid gold;
 		background-color: rgba(255, 215, 0, 0.2);
+	}
+	.active {
+		transform: scale(1.05);
+		transform-origin: center;
+		border-color: black;
+		animation: float 3s ease-in-out infinite;
+	}
+
+	@keyframes float {
+		0% {
+			transform: scale(1.05) translateY(0);
+		}
+		50% {
+			transform: scale(1.05) translateY(-5px);
+		}
+		100% {
+			transform: scale(1.05) translateY(0);
+		}
 	}
 </style>

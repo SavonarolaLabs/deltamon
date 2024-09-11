@@ -3,7 +3,7 @@
 </script>
 
 <div class="flex justify-between p-2 sticky top-0">
-	<a href={base} class="cursor-pointer">
+	<a href={base + "/"} class="cursor-pointer">
 		<div
 			class="logo bg-green-700 text-white px-2 pt-2 rounded-md text-xl h-full"
 		>
