@@ -94,7 +94,7 @@
 >
 	<Navigation></Navigation>
 
-	<div class="flex flex-col">
+	<div class="h-full flex flex-col justify-center">
 		<div
 			class="fixed top-12 left-2 bg-black bg-opacity-70 text-white p-2 w-32 z-10 flex flex-col"
 		>
