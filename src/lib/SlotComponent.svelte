@@ -93,8 +93,6 @@
 	.content {
 		padding-top: 1rem;
 		padding-bottom: 1rem;
-		padding-left: 0.25rem;
-		padding-right: 0.25rem;
 		height: 100%; /* Ensure full height */
 		display: flex;
 		flex-direction: column;
