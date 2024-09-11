@@ -83,7 +83,7 @@
 		transition: transform 0.15s ease;
 		transform: scale(1);
 		transform-origin: center;
-		width: 100%; /* Ensure full width */
+		width: 100%;
 	}
 
 	.creature-slot.active {
@@ -93,14 +93,14 @@
 	.content {
 		padding-top: 1rem;
 		padding-bottom: 1rem;
-		height: 100%; /* Ensure full height */
+		height: 100%;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 	}
 
 	.float-animation {
-		animation: float 3s ease-in-out infinite;
+		animation: float 2.5s ease-in-out infinite;
 	}
 
 	.selected {
