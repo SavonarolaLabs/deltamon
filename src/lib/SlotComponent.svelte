@@ -47,37 +47,40 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div
-	class="creature-slot border-gray-300 border border-slate-400 rounded-md bg-white"
-	class:cursor-pointer={!$click_mode}
-	class:cursor-not-allowed={$click_mode == CLICK_MODE_ATTACK &&
-		slot.creature?.playerId == game.activeCreature?.playerId}
-	class:selected={slot.creature?.isSelected}
-	class:active={slot.creature?.isActive}
-	on:click={handleClick}
->
-	<div class="content">
-		{#if slot.creature}
-			<img
-				class="block mx-auto"
-				src={base + "/monster/" + slot.creature.img}
-				alt={slot.creature.name}
-				width="190"
-			/>
 
-			<p class="text-center">
-				{#if slot.creature.canActThisRound}●{/if} HP {slot.creature
-					.hp}/{slot.creature.maxHp}
-			</p>
-		{:else}
-			<p class="text-center">No creature in this slot</p>
-		{/if}
+<div class:float-animation={slot.creature?.isActive}>
+	<div
+		class="creature-slot border-gray-300 border border-slate-400 rounded-md bg-white"
+		class:cursor-pointer={!$click_mode}
+		class:cursor-not-allowed={$click_mode == CLICK_MODE_ATTACK &&
+			slot.creature?.playerId == game.activeCreature?.playerId}
+		class:selected={slot.creature?.isSelected}
+		class:active={slot.creature?.isActive}
+		on:click={handleClick}
+	>
+		<div class="content">
+			{#if slot.creature}
+				<img
+					class="block mx-auto"
+					src={base + "/monster/" + slot.creature.img}
+					alt={slot.creature.name}
+					width="190"
+				/>
+
+				<p class="text-center">
+					{#if slot.creature.canActThisRound}●{/if} HP {slot.creature
+						.hp}/{slot.creature.maxHp}
+				</p>
+			{:else}
+				<p class="text-center">No creature in this slot</p>
+			{/if}
+		</div>
 	</div>
 </div>
 
 <style>
 	.creature-slot {
-		transition: transform 0.2s ease;
+		transition: transform 0.15s ease;
 		transform: scale(1);
 		transform-origin: center;
 		width: 100%; /* Ensure full width */
@@ -98,7 +101,7 @@
 		justify-content: center;
 	}
 
-	.active .content {
+	.float-animation {
 		animation: float 3s ease-in-out infinite;
 	}
 
