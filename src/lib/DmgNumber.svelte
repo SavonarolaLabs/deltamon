@@ -1,4 +1,5 @@
 <script>
+	//https://cartooncoffee.itch.io/fire-vfx
 	export let damage = 0;
 
 	let randomOffsetX = (Math.random() - 0.5) * 70;
