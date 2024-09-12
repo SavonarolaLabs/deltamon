@@ -8,6 +8,7 @@
 		selected_creature,
 	} from "./pvpuistate";
 	import { createEventDispatcher } from "svelte";
+	import DmgNumber from "./DmgNumber.svelte";
 
 	export let slot: Slot;
 	export let index: number;
@@ -59,6 +60,7 @@
 		on:click={handleClick}
 	>
 		<div class="content">
+			<DmgNumber damage={123}></DmgNumber>
 			{#if slot.creature}
 				<img
 					class="block mx-auto"
