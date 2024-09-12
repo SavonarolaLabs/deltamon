@@ -76,12 +76,16 @@
 	function notifyParent(action: any) {
 		dispatch("childUpdate", action);
 	}
+
+	$: isLeftSide = index < 6;
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
-	class="creature-slot-wrapper"
 	class:float-animation={slot.creature?.isActive}
+	style={slot.creature?.isActive ? "z-index:100;" : "z-index:10"}
 >
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div
 		class="creature-slot border-gray-300 border border-slate-400 rounded-md bg-white"
 		class:cursor-pointer={!$click_mode}
@@ -90,6 +94,8 @@
 		class:selected={slot.creature?.isSelected}
 		class:active={slot.creature?.isActive}
 		class:hit={$isHit}
+		class:hit-left={$isHit && isLeftSide}
+		class:hit-right={$isHit && !isLeftSide}
 		on:click={handleClick}
 	>
 		<div class="red-flash-layer"></div>
@@ -130,16 +136,9 @@
 </div>
 
 <style>
-	.creature-slot-wrapper {
-		position: relative;
+	.creature-slot {
 		width: 190px;
 		height: 234px;
-		transition: transform 0.15s ease;
-	}
-
-	.creature-slot {
-		width: 100%;
-		height: 100%;
 		position: relative;
 		overflow: hidden;
 		transition: transform 0.15s ease;
@@ -155,42 +154,47 @@
 		opacity: 0;
 		pointer-events: none;
 		z-index: 10;
+		transition: opacity 0.1s ease-out;
 	}
 
 	.creature-slot.hit .red-flash-layer {
 		opacity: 0.4;
-		animation: flash 0.2s ease-out;
-	}
-
-	@keyframes flash {
-		0%,
-		100% {
-			opacity: 0;
-		}
-		50% {
-			opacity: 0.4;
-		}
 	}
 
 	.creature-slot.active {
-		transform: scale(1.05);
+		transform: scale(1.15);
+		z-index: 1000;
 	}
 
 	.creature-slot.selected {
 		transform: scale(1.05);
 	}
 
-	.creature-slot.hit {
-		animation: hit 0.2s ease-out;
+	.creature-slot.hit-left {
+		animation: hit-left 0.2s ease-out;
 	}
 
-	@keyframes hit {
+	.creature-slot.hit-right {
+		animation: hit-right 0.2s ease-out;
+	}
+
+	@keyframes hit-left {
 		0%,
 		100% {
-			transform: scale(1);
+			transform: translateX(0);
 		}
 		50% {
-			transform: scale(0.95);
+			transform: translateX(-10px);
+		}
+	}
+
+	@keyframes hit-right {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		50% {
+			transform: translateX(10px);
 		}
 	}
 
