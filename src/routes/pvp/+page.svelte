@@ -78,8 +78,11 @@
 			attack(game, sourceId, msg.targetId);
 			click_mode.set(0);
 			updateCursor();
-			endTurn(game);
 			game.slots = game.slots;
+			setTimeout(() => {
+				endTurn(game);
+				game.slots = game.slots;
+			}, 800);
 		}
 	}
 </script>
