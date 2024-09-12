@@ -22,7 +22,7 @@
 		font-size: 24px;
 		font-weight: bold;
 		color: red;
-		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+		text-shadow: 2px 2px 0px rgba(0, 0, 0, 1); /* Hard shadow bottom-right */
 		position: absolute;
 		bottom: 0;
 		left: 0;
