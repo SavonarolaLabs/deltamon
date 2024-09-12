@@ -19,7 +19,7 @@
 
 	.damage-number {
 		font-family: "Inter", sans-serif;
-		font-size: 32px;
+		font-size: 42px;
 		font-weight: bold;
 		color: red;
 		text-shadow: 1.5px 1.5px 0px rgba(0, 0, 0, 1); /* Hard shadow bottom-right */
@@ -41,7 +41,11 @@
 			color: rgb(237, 245, 199);
 		}
 		10% {
-			transform: scale(1.1);
+			color: rgb(237, 245, 199);
+			transform: scale(1.125) perspective(300px) rotateY(-15deg)
+				skewX(-10deg);
+		}
+		20% {
 			color: rgb(237, 245, 199);
 			transform: scale(1) perspective(300px) rotateY(-15deg) skewX(-10deg);
 		}
