@@ -22,25 +22,27 @@
 		font-size: 24px;
 		font-weight: bold;
 		color: red;
-		text-shadow: 2px 2px 0px rgba(0, 0, 0, 1); /* Hard shadow bottom-right */
+		text-shadow: 1.5px 1.5px 0px rgba(0, 0, 0, 1); /* Hard shadow bottom-right */
 		position: absolute;
 		bottom: 0;
 		left: 0;
-		transform-origin: center;
+		transform-origin: left bottom; /* Shift the transform origin to the left */
+		transform: perspective(300px) rotateY(-15deg) skewX(-10deg); /* Perspective effect for larger right side */
 		animation: damage-pop 1s ease-out forwards;
 	}
 
 	@keyframes damage-pop {
 		0% {
-			transform: scale(1.1);
+			transform: scale(1.1) perspective(300px) rotateY(-15deg)
+				skewX(-10deg);
 			opacity: 1;
 		}
 		5% {
-			color: white;
+			color: rgb(237, 245, 199);
 		}
 		10% {
-			color: white;
-			transform: scale(1);
+			color: rgb(237, 245, 199);
+			transform: scale(1) perspective(300px) rotateY(-15deg) skewX(-10deg);
 		}
 		30% {
 		}
@@ -48,15 +50,19 @@
 			color: red;
 		}
 		75% {
-			transform: scale(1);
+			transform: scale(1) perspective(300px) rotateY(-15deg) skewX(-10deg);
 			opacity: 1;
 		}
 		90% {
-			transform: scale(0.5);
+			transform-origin: center; /* Change transform origin to center */
+			transform: scale(0.5) perspective(300px) rotateY(-15deg)
+				skewX(-10deg);
 			opacity: 0;
 		}
 		100% {
-			transform: scale(0.5);
+			transform-origin: center; /* Keep shrinking towards the center */
+			transform: scale(0.5) perspective(300px) rotateY(-15deg)
+				skewX(-10deg);
 			opacity: 0;
 		}
 	}
