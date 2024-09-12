@@ -7,15 +7,45 @@
 		CLICK_MODE_ATTACK,
 		selected_creature,
 	} from "./pvpuistate";
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 	import DmgNumber from "./DmgNumber.svelte";
+	import { writable } from "svelte/store";
 
 	export let slot: Slot;
 	export let index: number;
 	export let isTopRow: boolean;
 
+	let prevHp = slot.creature?.hp ?? 0;
+	let showDamage = writable(false);
+	let damageValue = writable(0);
+
+	// Random offsets for the damage number positioning
+	let dmgPositionX = writable(0);
+	let dmgPositionY = writable(0);
+
+	onMount(() => {
+		prevHp = slot.creature?.hp ?? 0;
+	});
+
+	$: if (slot.creature?.hp !== prevHp) {
+		const damageDiff = prevHp - (slot.creature?.hp ?? 0);
+		if (damageDiff !== 0) {
+			damageValue.set(Math.abs(damageDiff));
+			showDamage.set(true);
+
+			// Generate random position offsets within a radius (e.g., 20px)
+			dmgPositionX.set((Math.random() - 0.5) * 40); // Random offset between -20 and 20
+			dmgPositionY.set((Math.random() - 0.5) * 40); // Random offset between -20 and 20
+
+			// Hide the damage number after a delay (e.g., 1 second)
+			setTimeout(() => {
+				showDamage.set(false);
+			}, 1000);
+		}
+		prevHp = slot.creature?.hp ?? 0;
+	}
+
 	function handleClick() {
-		// attack click
 		if (
 			$click_mode == CLICK_MODE_ATTACK &&
 			slot.creature &&
@@ -29,7 +59,6 @@
 		}
 
 		if (slot.creature && !slot.creature.isSelected) {
-			// Toggle selection for the clicked creature
 			selected_creature.set(slot.creature);
 
 			game.slots.forEach((s) => {
@@ -42,12 +71,9 @@
 
 	const dispatch = createEventDispatcher();
 	function notifyParent(action: any) {
-		dispatch("childUpdate", action); // notify parent with the updated value
+		dispatch("childUpdate", action);
 	}
 </script>
-
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
 
 <div class:float-animation={slot.creature?.isActive}>
 	<div
@@ -60,7 +86,16 @@
 		on:click={handleClick}
 	>
 		<div class="content">
-			<DmgNumber damage={123}></DmgNumber>
+			<!-- Conditionally show the damage number with a random position -->
+			{#if $showDamage}
+				<div
+					class="dmg-number-wrapper"
+					style="transform: translate({$dmgPositionX}px, {$dmgPositionY}px);"
+				>
+					<DmgNumber damage={$damageValue} />
+				</div>
+			{/if}
+
 			{#if slot.creature}
 				<img
 					class="block mx-auto"
@@ -139,5 +174,12 @@
 		height: 100%;
 		background-color: #30794b;
 		transition: width 0.4s ease-in;
+	}
+
+	.dmg-number-wrapper {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 	}
 </style>
