@@ -1,9 +1,19 @@
 <script>
 	export let damage = 0;
+
+	let randomOffsetX = (Math.random() - 0.5) * 70;
+	let randomOffsetY = (Math.random() - 0.5) * 70;
+
+	let adjustedOffsetX = randomOffsetX - 20;
 </script>
 
-<div class="damage-number">
-	{damage}!
+<div
+	class="damage-number-wrapper"
+	style="transform: translate({adjustedOffsetX}px, {randomOffsetY}px);"
+>
+	<div class="damage-number">
+		{damage}!
+	</div>
 </div>
 
 <style>
@@ -17,18 +27,21 @@
 			url("/path-to-inter-variable-font.woff2") format("woff2");
 	}
 
+	.damage-number-wrapper {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+
 	.damage-number {
 		font-family: "Inter", sans-serif;
 		font-size: 42px;
 		font-weight: bold;
 		color: red;
-		text-shadow: 1.5px 1.5px 0px rgba(0, 0, 0, 1); /* Hard shadow bottom-right */
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		transform-origin: left bottom; /* Shift the transform origin to the left */
-		transform: perspective(300px) rotateY(-15deg) skewX(-10deg); /* Perspective effect for larger right side */
-		animation: damage-pop 0.85s ease-out forwards; /* Shortened duration to maintain speed */
+		text-shadow: 1.5px 1.5px 0px rgba(0, 0, 0, 1);
+		transform: perspective(300px) rotateY(-15deg) skewX(-10deg);
+		animation: damage-pop 0.85s ease-out forwards;
 	}
 
 	@keyframes damage-pop {
