@@ -67,10 +67,18 @@
 					width="190"
 				/>
 
-				<p class="text-center">
-					{#if slot.creature.canActThisRound}●{/if} HP {slot.creature
-						.hp}/{slot.creature.maxHp}
-				</p>
+				<!-- HP Bar -->
+				<div class="flex justify-center gap-1">
+					<div style="font-size:8px;font-weight:bold">HP</div>
+					<div class="hp-bar-wrapper self-center">
+						<div
+							class="hp-bar"
+							style="width: {(slot.creature.hp /
+								slot.creature.maxHp) *
+								100}%;"
+						></div>
+					</div>
+				</div>
 			{:else}
 				<p class="text-center">No creature in this slot</p>
 			{/if}
@@ -92,15 +100,14 @@
 
 	.content {
 		padding-top: 1rem;
-		padding-bottom: 1rem;
+		padding-bottom: 0.5rem;
 		height: 100%;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
 	}
 
 	.float-animation {
-		animation: float 2.5s ease-in-out infinite;
+		animation: float 2.4s ease-in-out infinite;
 	}
 
 	.selected {
@@ -114,7 +121,21 @@
 			transform: translateY(0px);
 		}
 		50% {
-			transform: translateY(-5px);
+			transform: translateY(-6px);
 		}
+	}
+
+	.hp-bar-wrapper {
+		width: 80%;
+		height: 4px;
+		background-color: #e0e0e0;
+		border-radius: 2px;
+		overflow: hidden;
+	}
+
+	.hp-bar {
+		height: 100%;
+		background-color: #30794b;
+		transition: width 0.4s ease-in;
 	}
 </style>
