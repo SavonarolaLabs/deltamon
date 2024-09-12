@@ -18,8 +18,8 @@
 	let prevHp = slot.creature?.hp ?? 0;
 	let showDamage = writable(false);
 	let damageValue = writable(0);
+	let isHit = writable(false);
 
-	// Random offsets for the damage number positioning
 	let dmgPositionX = writable(0);
 	let dmgPositionY = writable(0);
 
@@ -32,12 +32,15 @@
 		if (damageDiff !== 0) {
 			damageValue.set(Math.abs(damageDiff));
 			showDamage.set(true);
+			isHit.set(true);
 
-			// Generate random position offsets within a radius (e.g., 20px)
-			dmgPositionX.set((Math.random() - 0.5) * 40); // Random offset between -20 and 20
-			dmgPositionY.set((Math.random() - 0.5) * 40); // Random offset between -20 and 20
+			dmgPositionX.set((Math.random() - 0.5) * 40);
+			dmgPositionY.set((Math.random() - 0.5) * 40);
 
-			// Hide the damage number after a delay (e.g., 1 second)
+			setTimeout(() => {
+				isHit.set(false);
+			}, 200);
+
 			setTimeout(() => {
 				showDamage.set(false);
 			}, 1000);
@@ -75,9 +78,10 @@
 	}
 </script>
 
-<div class:float-animation={slot.creature?.isActive}>
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div
+	class="creature-slot-wrapper"
+	class:float-animation={slot.creature?.isActive}
+>
 	<div
 		class="creature-slot border-gray-300 border border-slate-400 rounded-md bg-white"
 		class:cursor-pointer={!$click_mode}
@@ -85,10 +89,11 @@
 			slot.creature?.playerId == game.activeCreature?.playerId}
 		class:selected={slot.creature?.isSelected}
 		class:active={slot.creature?.isActive}
+		class:hit={$isHit}
 		on:click={handleClick}
 	>
+		<div class="red-flash-layer"></div>
 		<div class="content">
-			<!-- Conditionally show the damage number with a random position -->
 			{#if $showDamage}
 				<div
 					class="dmg-number-wrapper"
@@ -106,7 +111,6 @@
 					width="190"
 				/>
 
-				<!-- HP Bar -->
 				<div class="flex justify-center gap-1">
 					<div style="font-size:8px;font-weight:bold">HP</div>
 					<div class="hp-bar-wrapper self-center">
@@ -126,15 +130,68 @@
 </div>
 
 <style>
-	.creature-slot {
+	.creature-slot-wrapper {
+		position: relative;
+		width: 190px;
+		height: 234px;
 		transition: transform 0.15s ease;
-		transform: scale(1);
-		transform-origin: center;
+	}
+
+	.creature-slot {
 		width: 100%;
+		height: 100%;
+		position: relative;
+		overflow: hidden;
+		transition: transform 0.15s ease;
+	}
+
+	.red-flash-layer {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: red;
+		opacity: 0;
+		pointer-events: none;
+		z-index: 10;
+	}
+
+	.creature-slot.hit .red-flash-layer {
+		opacity: 0.4;
+		animation: flash 0.2s ease-out;
+	}
+
+	@keyframes flash {
+		0%,
+		100% {
+			opacity: 0;
+		}
+		50% {
+			opacity: 0.4;
+		}
 	}
 
 	.creature-slot.active {
 		transform: scale(1.05);
+	}
+
+	.creature-slot.selected {
+		transform: scale(1.05);
+	}
+
+	.creature-slot.hit {
+		animation: hit 0.2s ease-out;
+	}
+
+	@keyframes hit {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(0.95);
+		}
 	}
 
 	.content {
