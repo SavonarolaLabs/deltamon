@@ -164,6 +164,7 @@
 	.creature-slot.active {
 		transform: scale(1.15);
 		z-index: 1000;
+		box-shadow: 0 5px 5px rgba(0, 0, 0, 0.7);
 	}
 
 	.creature-slot.selected {
