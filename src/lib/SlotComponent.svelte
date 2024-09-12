@@ -76,6 +76,8 @@
 </script>
 
 <div class:float-animation={slot.creature?.isActive}>
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="creature-slot border-gray-300 border border-slate-400 rounded-md bg-white"
 		class:cursor-pointer={!$click_mode}

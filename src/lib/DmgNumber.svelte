@@ -53,13 +53,13 @@
 		5% {
 			color: rgb(237, 245, 199);
 		}
-		10% {
+		30% {
 			color: rgb(237, 245, 199);
 			transform: scale(1.125) perspective(300px) rotateY(-15deg)
 				skewX(-10deg);
 		}
-		20% {
-			color: rgb(237, 245, 199);
+		60% {
+			color: rgb(255, 88, 88);
 			transform: scale(1) perspective(300px) rotateY(-15deg) skewX(-10deg);
 		}
 		75% {
@@ -69,13 +69,13 @@
 		}
 		95% {
 			transform-origin: center;
-			transform: scale(1, 0.8) perspective(300px) rotateY(-15deg)
+			transform: scale(0.5, 0.3) perspective(300px) rotateY(-15deg)
 				skewX(-10deg);
 			opacity: 0.8;
 		}
 		100% {
 			transform-origin: center;
-			transform: scale(1, 0.1) perspective(300px) rotateY(-15deg)
+			transform: scale(0.4, 0.3) perspective(300px) rotateY(-15deg)
 				skewX(-10deg);
 			opacity: 0;
 		}
