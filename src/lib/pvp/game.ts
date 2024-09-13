@@ -16,6 +16,7 @@ function toBattleCreature(
 		canActThisRound: false,
 		isActive: false,
 		isSelected: false,
+		isTargetCandidate: false,
 	};
 	return c;
 }

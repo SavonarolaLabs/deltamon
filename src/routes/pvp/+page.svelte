@@ -12,10 +12,10 @@
 		selected_creature,
 	} from "$lib/pvpuistate";
 	import { attack } from "$lib/pvp/combat";
+	import type { GameState } from "$lib/types";
 
 	let logs: string[] = [];
 	let logContainer: HTMLDivElement;
-	let cursorStyle = "default";
 
 	function updateCursor() {
 		document.body.style.cursor =
@@ -24,12 +24,41 @@
 				: "default";
 	}
 
+	function setTargetableCreatures(game: GameState): GameState {
+		const activePlayer = game.activeCreature?.playerId;
+		console.log("setTargetableCreatures: ");
+		game.slots.forEach((slot) => {
+			if (slot?.creature && slot.creature.playerId !== activePlayer) {
+				slot.creature.isTargetCandidate = true;
+			} else {
+				slot.creature.isTargetCandidate = false;
+			}
+		});
+		return game;
+	}
+
+	function unsetTargetableCreatures(game: GameState): GameState {
+		game.slots.forEach((slot) => {
+			if (slot?.creature) {
+				slot.creature.isTargetCandidate = false;
+			}
+		});
+		return game;
+	}
+
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.key.toLowerCase() === "a") {
+			if ($click_mode == CLICK_MODE_ATTACK) {
+				return;
+			}
 			click_mode.set(CLICK_MODE_ATTACK);
+			setTargetableCreatures(game);
+			game.slots = game.slots;
 			updateCursor();
 		} else if (event.key === "Escape") {
 			if ($click_mode == CLICK_MODE_ATTACK) {
+				unsetTargetableCreatures(game);
+				game.slots = game.slots;
 				click_mode.set(0);
 			} else {
 				selected_creature.set(null);
@@ -109,6 +138,7 @@
 				<p>Winner: TBD</p>
 			{/if}
 		</div>
+		<div class="mt-10">click_mode:{$click_mode}</div>
 
 		<main
 			class="flex justify-center items-center text-sm mt-8 justify-around"

@@ -99,6 +99,9 @@
 		on:click={handleClick}
 	>
 		<div class="red-flash-layer"></div>
+		{#if $click_mode != 0 && !slot.creature?.isTargetCandidate && !slot.creature?.isActive}
+			<div class="not-targetable-layer"></div>
+		{/if}
 		<div class="content">
 			{#if $showDamage}
 				<div
@@ -116,7 +119,6 @@
 					alt={slot.creature.name}
 					width="190"
 				/>
-
 				<div class="flex justify-center gap-1">
 					<div style="font-size:8px;font-weight:bold">HP</div>
 					<div class="hp-bar-wrapper self-center">
@@ -155,6 +157,17 @@
 		pointer-events: none;
 		z-index: 10;
 		transition: opacity 0.1s ease-out;
+	}
+
+	.not-targetable-layer {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, 0.3);
+		pointer-events: none;
+		z-index: 10;
 	}
 
 	.creature-slot.hit .red-flash-layer {
