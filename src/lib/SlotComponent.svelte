@@ -54,6 +54,7 @@
 			slot.creature &&
 			slot.creature?.playerId != game.activeCreature?.playerId
 		) {
+			slot.creature.isHoveredTarget = false;
 			notifyParent({
 				action: "attack",
 				targetId: slot.creature.bcId,
@@ -77,6 +78,22 @@
 		dispatch("childUpdate", action);
 	}
 
+	function handleMouseEnter() {
+		if (
+			slot.creature &&
+			$click_mode != 0 &&
+			slot.creature?.isTargetCandidate
+		) {
+			slot.creature.isHoveredTarget = true;
+		}
+	}
+
+	function handleMouseLeave() {
+		if (slot.creature) {
+			slot.creature.isHoveredTarget = false;
+		}
+	}
+
 	$: isLeftSide = index < 6;
 </script>
 
@@ -84,6 +101,8 @@
 <div
 	class:float-animation={slot.creature?.isActive}
 	style={slot.creature?.isActive ? "z-index:100;" : "z-index:10"}
+	on:mouseenter={handleMouseEnter}
+	on:mouseleave={handleMouseLeave}
 >
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div
@@ -96,6 +115,7 @@
 		class:hit={$isHit}
 		class:hit-left={$isHit && isLeftSide}
 		class:hit-right={$isHit && !isLeftSide}
+		class:hovered-target={slot.creature?.isHoveredTarget}
 		on:click={handleClick}
 	>
 		<div class="red-flash-layer"></div>
@@ -144,6 +164,10 @@
 		position: relative;
 		overflow: hidden;
 		transition: transform 0.15s ease;
+	}
+
+	.creature-slot.hovered-target {
+		border: 4px solid rgba(203, 0, 0, 0.832);
 	}
 
 	.red-flash-layer {

@@ -25,6 +25,7 @@ export type BattleCreature = Creature & {
 	isActive: boolean;
 	isSelected: boolean;
 	isTargetCandidate: boolean;
+	isHoveredTarget: boolean;
 };
 
 export type PlayerId = number;

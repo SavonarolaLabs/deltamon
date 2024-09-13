@@ -17,6 +17,7 @@ function toBattleCreature(
 		isActive: false,
 		isSelected: false,
 		isTargetCandidate: false,
+		isHoveredTarget: false,
 	};
 	return c;
 }
