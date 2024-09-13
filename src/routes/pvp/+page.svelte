@@ -138,7 +138,6 @@
 				<p>Winner: TBD</p>
 			{/if}
 		</div>
-		<div class="mt-10">click_mode:{$click_mode}</div>
 
 		<main
 			class="flex justify-center items-center text-sm mt-8 justify-around"
