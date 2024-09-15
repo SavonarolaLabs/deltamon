@@ -5,7 +5,7 @@
 	import { endTurn, startMatch } from "$lib/pvp/gameloop";
 	import SlotComponent from "$lib/SlotComponent.svelte";
 	import { onMount, tick } from "svelte";
-	import BattleCreaturePanel from "$lib/BattleCreaturePanel.svelte";
+	import CreaturePanel from "$lib/CreaturePanel.svelte";
 	import {
 		click_mode,
 		CLICK_MODE_ATTACK,
@@ -98,6 +98,7 @@
 		updateCursor();
 		startMatch(game);
 		game.slots = game.slots;
+		selected_creature.set(game.activeCreature);
 	});
 
 	function handleChildUpdate(event: CustomEvent) {
@@ -194,7 +195,7 @@
 		</div>
 
 		<!-- Hero Panel -->
-		<BattleCreaturePanel />
+		<CreaturePanel />
 	</div>
 </div>
 
