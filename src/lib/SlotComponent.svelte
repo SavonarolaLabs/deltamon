@@ -10,6 +10,7 @@
 	import { createEventDispatcher, onMount } from "svelte";
 	import DmgNumber from "./DmgNumber.svelte";
 	import { writable } from "svelte/store";
+	import Tri from "./Tri.svelte";
 
 	export let slot: Slot;
 	export let index: number;
@@ -107,7 +108,7 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div
 		class="creature-slot border-gray-300 border border-slate-400 rounded-md bg-white"
-		class:cursor-pointer={!$click_mode}
+		class:cursor-pointer={!$click_mode && slot.creature}
 		class:cursor-not-allowed={$click_mode == CLICK_MODE_ATTACK &&
 			slot.creature?.playerId == game.activeCreature?.playerId}
 		class:selected={slot.creature?.isSelected}
@@ -116,10 +117,11 @@
 		class:hit-left={$isHit && isLeftSide}
 		class:hit-right={$isHit && !isLeftSide}
 		class:hovered-target={slot.creature?.isHoveredTarget}
+		class:empty-slot={!slot.creature}
 		on:click={handleClick}
 	>
 		<div class="red-flash-layer"></div>
-		{#if $click_mode != 0 && !slot.creature?.isTargetCandidate && !slot.creature?.isActive}
+		{#if slot.creature && $click_mode != 0 && !slot.creature?.isTargetCandidate && !slot.creature?.isActive}
 			<div class="not-targetable-layer"></div>
 		{/if}
 		<div class="content">
@@ -151,13 +153,24 @@
 					</div>
 				</div>
 			{:else}
-				<p class="text-center">No creature in this slot</p>
+				<div
+					class="logo text-green-200 text-white text-xl h-full flex flex-col justify-center items-center"
+				>
+					<div class="flex items-center">DELTAMON</div>
+				</div>
 			{/if}
 		</div>
 	</div>
 </div>
 
 <style>
+	.logo {
+		font-family: "Luckiest Guy", cursive;
+	}
+	.empty-slot {
+		opacity: 0.9;
+		background-color: rgba(0, 0, 0, 0.583);
+	}
 	.creature-slot {
 		width: 190px;
 		height: 234px;
