@@ -31,7 +31,9 @@
 			if (slot?.creature && slot.creature.playerId !== activePlayer) {
 				slot.creature.isTargetCandidate = true;
 			} else {
-				slot.creature.isTargetCandidate = false;
+				if (slot.creature) {
+					slot.creature.isTargetCandidate = false;
+				}
 			}
 		});
 		return game;

@@ -52,8 +52,8 @@ export const game: GameState = {
 
 		{ creature: null },
 		{ creature: null },
-		{ creature: toBattleCreature(1, creatures[121]) },
-		{ creature: toBattleCreature(1, creatures[151]) },
+		{ creature: toBattleCreature(2, creatures[121]) },
+		{ creature: toBattleCreature(2, creatures[151]) },
 		{ creature: null },
 		{ creature: null },
 	],
