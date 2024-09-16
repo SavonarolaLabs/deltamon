@@ -26,4 +26,5 @@ export function die(game: GameState, creatureId: BattleCreatureId): GameState {
 			slot.creature = null;
 		}
 	});
+	return game;
 }

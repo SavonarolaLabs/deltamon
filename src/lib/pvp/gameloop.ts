@@ -12,11 +12,16 @@ function startTurn(game: GameState): GameState {
 }
 
 export function endTurn(game: GameState): GameState {
-	endCurrentCeaturesAction(game);
-	if (game.slots.filter((s) => s.creature?.canActThisRound).length) {
-		startTurn(game);
+	endMatchIfNoCreatures(game);
+	if (game.gameOver) {
+		return game;
 	} else {
-		endRound(game);
+		endCurrentCeaturesAction(game);
+		if (game.slots.filter((s) => s.creature?.canActThisRound).length) {
+			startTurn(game);
+		} else {
+			endRound(game);
+		}
 	}
 	return game;
 }
@@ -34,6 +39,10 @@ function endRound(game: GameState): GameState {
 	if (hasCreatures(game, P1) && hasCreatures(game, P2)) {
 		startRound(game);
 	}
+	return endMatchIfNoCreatures(game);
+}
+
+function endMatchIfNoCreatures(game: GameState): GameState {
 	if (!hasCreatures(game, P1)) {
 		endMatch(game, P2);
 	} else if (!hasCreatures(game, P2)) {
