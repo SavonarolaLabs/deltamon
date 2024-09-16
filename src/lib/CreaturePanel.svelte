@@ -60,7 +60,7 @@
 						</div>
 					</div>
 					<!-- HP+MP Bar -->
-					<div class="flex flex-col">
+					<div class="flex flex-col gap-1">
 						<div class="w-full bg-green-700 text-center">
 							{$selected_creature.hp}/{$selected_creature.maxHp}
 						</div>
