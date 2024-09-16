@@ -36,7 +36,11 @@
 			<div class="flex gap-4">
 				<!-- Avatar -->
 				<div>
-					<img src="{base}/monster/{$selected_creature.img}" alt="" />
+					<img
+						style="width:130px;"
+						src="{base}/monster/{$selected_creature.img}"
+						alt=""
+					/>
 				</div>
 				<!-- Skills + Bars -->
 				<div class="flex flex-col gap-2">
