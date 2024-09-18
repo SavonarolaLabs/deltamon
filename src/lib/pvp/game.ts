@@ -12,6 +12,7 @@ function toBattleCreature(
 		bcId: crypto.randomUUID(),
 		...creature,
 		hp: creature.maxHp,
+		mp: creature.maxMp,
 		playerId,
 		canActThisRound: false,
 		isActive: false,

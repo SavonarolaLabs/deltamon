@@ -1,22 +1,12 @@
-import type { BattleCreature, BattleCreatureId, GameState } from "$lib/types";
+import type { BattleCreatureId, GameState, Ability } from "$lib/types";
 
-export function attack(
+export function useAbility(
 	game: GameState,
 	sourceId: BattleCreatureId,
-	targetId: BattleCreatureId
-): GameState {
-	const source: BattleCreature = game.slots.find(
-		(s) => s.creature?.bcId == sourceId
-	)?.creature!;
-	const target: BattleCreature = game.slots.find(
-		(s) => s.creature?.bcId == targetId
-	)?.creature!;
-	const attackDmg = Math.max(source.attack - target.defense, 0);
-	target.hp = Math.max(0, target.hp - attackDmg);
-	if (target.hp == 0) {
-		die(game, targetId);
-	}
-	return game;
+	targetIds: BattleCreatureId[],
+	ability: Ability
+) {
+	return ability.action(game, sourceId, targetIds, ability);
 }
 
 // if creature dies but returns dmg and then the other dies, the last one to die wins

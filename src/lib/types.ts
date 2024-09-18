@@ -3,10 +3,11 @@ export type Creature = {
 	name: string;
 	img: string;
 	maxHp: number;
+	maxMp: number;
 	attack: number;
 	defense: number;
 	initiative: number;
-	skills: CretureSkill[];
+	abilities: Ability[];
 };
 
 export type CretureSkill = {
@@ -20,6 +21,7 @@ export type Slot = {
 export type BattleCreature = Creature & {
 	bcId: BattleCreatureId;
 	hp: number;
+	mp: number;
 	playerId: number;
 	canActThisRound: boolean;
 	isActive: boolean;
@@ -44,3 +46,19 @@ export type GameState = {
 	gameOver: boolean;
 	winner: Player | null;
 };
+
+export type Ability = {
+	name: string;
+	description: string;
+	icon: string;
+	manaCost: number;
+	abilityType: "physical" | "magical";
+	action: AbilityFunction;
+};
+
+export type AbilityFunction = (
+	game: GameState,
+	sourceId: BattleCreatureId,
+	targetIds: BattleCreatureId[],
+	ability: Ability
+) => GameState;

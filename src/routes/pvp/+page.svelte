@@ -11,7 +11,7 @@
 		CLICK_MODE_ATTACK,
 		selected_creature,
 	} from "$lib/pvpuistate";
-	import { attack } from "$lib/pvp/combat";
+	import { useAbility } from "$lib/pvp/combat";
 	import type { GameState } from "$lib/types";
 
 	let logs: string[] = [];
@@ -107,7 +107,14 @@
 		const msg = event.detail;
 		if (msg?.action == "attack") {
 			const sourceId = game.activeCreature?.bcId!;
-			attack(game, sourceId, msg.targetId);
+			//attack(game, sourceId, [msg.targetId]);
+			useAbility(
+				game,
+				sourceId,
+				[msg.targetId],
+				// first ability is always attack for now
+				game.activeCreature?.abilities[0]!
+			);
 			click_mode.set(0);
 			updateCursor();
 			game.slots = game.slots;
