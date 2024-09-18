@@ -28,21 +28,6 @@ export const game: GameState = {
 		{ id: 1, name: "Player 1" },
 		{ id: 2, name: "Player 2" },
 	],
-	// slots: [
-	// 	{ creature: toBattleCreature(1, creatures[11]) },
-	// 	{ creature: toBattleCreature(1, creatures[10]) },
-	// 	{ creature: toBattleCreature(1, creatures[25]) },
-	// 	{ creature: toBattleCreature(1, creatures[21]) },
-	// 	{ creature: toBattleCreature(1, creatures[143]) },
-	// 	{ creature: toBattleCreature(1, creatures[52]) },
-
-	// 	{ creature: toBattleCreature(2, creatures[7]) },
-	// 	{ creature: toBattleCreature(2, creatures[18]) },
-	// 	{ creature: toBattleCreature(2, creatures[33]) },
-	// 	{ creature: toBattleCreature(2, creatures[5]) },
-	// 	{ creature: toBattleCreature(2, creatures[31]) },
-	// 	{ creature: toBattleCreature(2, creatures[3]) },
-	// ],
 	slots: [
 		{ creature: null },
 		{ creature: null },
