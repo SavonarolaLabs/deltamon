@@ -17,6 +17,7 @@ function createCreatureList(): Creature[] {
 				name: "",
 				img: img,
 				maxHp: generateRandomStat(50, 150),
+				maxMp: generateRandomStat(50, 150),
 				attack: generateRandomStat(10, 50),
 				defense: generateRandomStat(5, 25),
 				initiative: generateRandomStat(1, 20),

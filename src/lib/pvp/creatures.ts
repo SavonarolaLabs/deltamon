@@ -101,14 +101,15 @@ export const creatures = [
 		abilities: [attackAbility],
 	},
 	{
+		// fire
 		id: 10,
 		name: "",
 		img: "103_1.jpg",
-		maxHp: 118,
+		maxHp: 58,
 		maxMp: 100,
-		attack: 47,
-		defense: 16,
-		initiative: 4,
+		attack: 23,
+		defense: 24,
+		initiative: 17,
 		abilities: [attackAbility],
 	},
 	{
@@ -244,14 +245,15 @@ export const creatures = [
 		abilities: [attackAbility],
 	},
 	{
+		// ice
 		id: 23,
 		name: "",
 		img: "107_1.jpg",
-		maxHp: 58,
+		maxHp: 118,
 		maxMp: 100,
-		attack: 23,
-		defense: 24,
-		initiative: 17,
+		attack: 47,
+		defense: 16,
+		initiative: 4,
 		abilities: [attackAbility],
 	},
 	{
