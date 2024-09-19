@@ -45,7 +45,9 @@
 						<div class="w-full bg-green-700 text-center">
 							{$selected_creature.hp}/{$selected_creature.maxHp}
 						</div>
-						<div class="w-full bg-blue-600 text-center">0/0</div>
+						<div class="w-full bg-blue-600 text-center">
+							{$selected_creature.mp}/{$selected_creature.maxMp}
+						</div>
 					</div>
 				</div>
 				<!-- Stats -->
