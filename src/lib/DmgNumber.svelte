@@ -18,7 +18,7 @@
 </div>
 
 <style>
-	@font-face {
+	/* @font-face {
 		font-family: "Inter";
 		font-style: normal;
 		font-weight: 400;
@@ -26,7 +26,7 @@
 		src:
 			local("Inter"),
 			url("/path-to-inter-variable-font.woff2") format("woff2");
-	}
+	} */
 
 	.damage-number-wrapper {
 		position: absolute;
