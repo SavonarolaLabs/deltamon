@@ -6,15 +6,19 @@
 
 {#if $selected_creature}
 	<div
-		class=" bg-gray-800 text-white p-4 z-50 w-[fit-content] fixed bottom-0 left-1/2 -translate-x-1/2"
+		class=" text-white z-50 w-[fit-content] fixed bottom-0 left-1/2 -translate-x-1/2"
 		style="z-index:2000"
 	>
 		<div class="flex-flex-col">
 			<!-- Name + Buffs+Debuffs -->
-			<div class="flex items-end">
-				{$selected_creature.bcId}
+			<div
+				class="flex items-end text-white text-md font-bold"
+				style="text-shadow: 2px 2px 0px black;"
+			>
+				{$selected_creature.name}
 			</div>
-			<div class="flex gap-4">
+
+			<div class="flex gap-4 bg-gray-800">
 				<!-- Avatar -->
 				<div style="width:130px;">
 					<img src="{base}/monster/{$selected_creature.img}" alt="" />
@@ -45,7 +49,7 @@
 					</div>
 				</div>
 				<!-- Stats -->
-				<div>
+				<div class="pr-2">
 					<div class="flex w-[100px] flex-col items-end">
 						<div>{$selected_creature.attack} ATK</div>
 						<div>{$selected_creature.defense} DEF</div>

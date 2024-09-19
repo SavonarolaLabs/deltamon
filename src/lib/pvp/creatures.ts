@@ -113,7 +113,7 @@ export const creatures = [
 	{
 		// fire
 		id: 10,
-		name: "",
+		name: "Moltaspin",
 		img: "103_1.jpg",
 		maxHp: 58,
 		maxMp: 100,
@@ -263,7 +263,7 @@ export const creatures = [
 	{
 		// ice
 		id: 23,
-		name: "",
+		name: "Glaciclaw",
 		img: "107_1.jpg",
 		maxHp: 118,
 		maxMp: 100,

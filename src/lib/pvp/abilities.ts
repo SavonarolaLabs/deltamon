@@ -51,7 +51,7 @@ export const redBeamAbility: Ability = {
 export const iceMissleAbility: Ability = {
 	name: "Ice Missle",
 	description: "Deals fire damage to the target.",
-	icon: "ice-blue-1.png",
+	icon: "ice-blue-2.png",
 	manaCost: 10,
 	abilityType: "magical",
 	action: fireballFunction,
