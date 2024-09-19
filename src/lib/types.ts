@@ -1,3 +1,5 @@
+import { DamageType } from "$lib/pvp/constants";
+
 export type Creature = {
 	id: number;
 	name: string;
@@ -8,6 +10,8 @@ export type Creature = {
 	defense: number;
 	initiative: number;
 	abilities: Ability[];
+	dmgAmplifier: Record<DamageType, number>;
+	dmgResistance: Record<DamageType, number>;
 };
 
 export type CretureSkill = {
@@ -52,7 +56,7 @@ export type Ability = {
 	description: string;
 	icon: string;
 	manaCost: number;
-	abilityType: "physical" | "magical";
+	damage?: DamageInstance[];
 	action: AbilityFunction;
 };
 
@@ -62,3 +66,12 @@ export type AbilityFunction = (
 	targetIds: BattleCreatureId[],
 	ability: Ability
 ) => GameState;
+
+export type Damage = {
+	amount: number;
+	type: DamageType;
+};
+
+export type DamageInstance = {
+	parts: Damage[];
+};

@@ -1,6 +1,7 @@
 import { creatureImages } from "$lib/creatureImages";
 import { writeFileSync } from "fs";
 import { Creature } from "../types";
+import { PHYSICAL, FIRE, ICE, PURE } from "./constants"; // Make sure you import these from your constants file
 
 function generateRandomStat(min: number, max: number): number {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -10,8 +11,8 @@ function createCreatureList(): Creature[] {
 	const creatures: Creature[] = [];
 	let creatureNumber = 1;
 
-	creatureImages.forEach((evolutionChain, index) => {
-		evolutionChain.forEach((img, evolutionIndex) => {
+	creatureImages.forEach((evolutionChain) => {
+		evolutionChain.forEach((img) => {
 			creatures.push({
 				id: creatureNumber++,
 				name: "",
@@ -22,6 +23,18 @@ function createCreatureList(): Creature[] {
 				defense: generateRandomStat(5, 25),
 				initiative: generateRandomStat(1, 20),
 				abilities: [],
+				dmgAmplifier: {
+					[PHYSICAL]: 1,
+					[PURE]: 1,
+					[FIRE]: generateRandomStat(0.5, 1.5),
+					[ICE]: generateRandomStat(0.5, 1.5),
+				},
+				dmgResistance: {
+					[PHYSICAL]: generateRandomStat(0.5, 1.5),
+					[PURE]: 1,
+					[FIRE]: generateRandomStat(0.5, 1.5),
+					[ICE]: generateRandomStat(0.5, 1.5),
+				},
 			});
 		});
 	});
