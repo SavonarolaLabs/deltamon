@@ -195,6 +195,7 @@
 
 		<!-- Game Log -->
 		<div
+			style="display:none"
 			bind:this={logContainer}
 			class="fixed bottom-0 w-full bg-black bg-opacity-80 text-white p-4 max-h-40 overflow-y-auto"
 		>

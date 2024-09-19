@@ -1,4 +1,14 @@
-import { attackAbility } from "./abilities";
+import {
+	attackAbility,
+	enchantAbility,
+	evilEyeAbility,
+	explosionAbility,
+	fireballAbility,
+	hasteAbility,
+	iceMissleAbility,
+	IceNovaAbility,
+	redBeamAbility,
+} from "./abilities";
 
 export const creatures = [
 	{
@@ -110,7 +120,13 @@ export const creatures = [
 		attack: 23,
 		defense: 24,
 		initiative: 17,
-		abilities: [attackAbility],
+		abilities: [
+			attackAbility,
+			fireballAbility,
+			enchantAbility,
+			evilEyeAbility,
+			redBeamAbility,
+		],
 	},
 	{
 		id: 11,
@@ -254,7 +270,13 @@ export const creatures = [
 		attack: 47,
 		defense: 16,
 		initiative: 4,
-		abilities: [attackAbility],
+		abilities: [
+			attackAbility,
+			iceMissleAbility,
+			hasteAbility,
+			explosionAbility,
+			IceNovaAbility,
+		],
 	},
 	{
 		id: 24,
