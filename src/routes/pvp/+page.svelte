@@ -138,14 +138,14 @@
 
 	<div class="h-full flex flex-col justify-center">
 		<div
+			style="display:none;"
 			class="fixed top-12 left-2 bg-black bg-opacity-70 text-white p-2 w-32 z-10 flex flex-col"
 		>
 			<p>Round: {game.currentRound}</p>
-			<p>Game Over: {game.gameOver ? "Yes" : "No"}</p>
 			{#if game.winner}
 				<p>Winner: {game.winner.name}</p>
 			{:else}
-				<p>Winner: TBD</p>
+				<p>Winner: -</p>
 			{/if}
 		</div>
 
