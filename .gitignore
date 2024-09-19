@@ -11,3 +11,4 @@ vite.config.ts.timestamp-*
 /static/monster
 /notes
 /static/assets
+/static/spells
