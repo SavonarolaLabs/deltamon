@@ -2,6 +2,7 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
 import fs from "fs-extra";
 import path from "path";
+import string from "vite-plugin-string";
 
 export default defineConfig({
 	plugins: [
@@ -31,5 +32,8 @@ export default defineConfig({
 				console.log("All images replaced with 39_1.jpg");
 			},
 		},
+		string({
+			include: ["**/*.vert", "**/*.frag"],
+		}),
 	],
 });
