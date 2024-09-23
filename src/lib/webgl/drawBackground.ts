@@ -37,10 +37,7 @@ export function drawBackground(
 	gl.bufferData(gl.ARRAY_BUFFER, modifiedPositions, gl.STATIC_DRAW);
 
 	// Bind position attribute and texture coordinates
-	const positionAttribute = gl.getAttribLocation(
-		shaderProgram,
-		"aVertexPosition"
-	);
+	const positionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
 	gl.enableVertexAttribArray(positionAttribute);
 	gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
 
@@ -50,14 +47,11 @@ export function drawBackground(
 	}
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-	const textureCoordAttribute = gl.getAttribLocation(
-		shaderProgram,
-		"aTextureCoord"
-	);
+	const textureCoordAttribute = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
 	gl.enableVertexAttribArray(textureCoordAttribute);
 	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
 
-	const samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+	const samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler');
 	gl.uniform1i(samplerUniform, 0);
 
 	// Draw the background quad
