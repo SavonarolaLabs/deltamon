@@ -1,7 +1,7 @@
-import { initBuffers } from "./buffers";
-import { drawScene } from "./draw";
-import { initShaders } from "./shaders";
-import { loadCreatureTexture } from "./textures";
+import { initBuffers } from './buffers';
+import { drawScene } from './draw';
+import { initShaders } from './shaders';
+import { loadCreatureTexture } from './textures';
 
 export function initWebGL(
 	canvas: HTMLCanvasElement,
@@ -12,11 +12,10 @@ export function initWebGL(
 	buffers: any;
 } | null {
 	// Get WebGL context
-	const gl = canvas.getContext("webgl");
+	const gl = canvas.getContext('webgl', { alpha: true });
+
 	if (!gl) {
-		console.error(
-			"Unable to initialize WebGL. Your browser may not support it."
-		);
+		console.error('Unable to initialize WebGL. Your browser may not support it.');
 		return null;
 	}
 
@@ -30,10 +29,13 @@ export function initWebGL(
 	// Initialize shaders and buffers
 	const shaderProgram = initShaders(gl);
 	if (!shaderProgram) {
-		console.error("Failed to initialize shader program");
+		console.error('Failed to initialize shader program');
 		return null;
 	}
 	const buffers = initBuffers(gl);
+
+	gl.enable(gl.BLEND);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 	// Set clear color and clear the screen
 	gl.clearColor(0.0, 0.0, 0.0, 1.0); // Black background
@@ -42,13 +44,11 @@ export function initWebGL(
 	// Load creature textures (asynchronously)
 	const creatureTextures: { [key: string]: WebGLTexture } = {};
 	let texturesLoaded = 0;
-	const totalTextures = gameState.slots.filter(
-		(slot: any) => slot.creature
-	).length;
+	const totalTextures = gameState.slots.filter((slot: any) => slot.creature).length;
 
 	gameState.slots.forEach((slot: any) => {
 		if (slot.creature) {
-			loadCreatureTexture(gl, slot.creature.img, (texture) => {
+			loadCreatureTexture(gl, slot.creature.img, texture => {
 				creatureTextures[slot.creature.bcId] = texture;
 				texturesLoaded++;
 				if (texturesLoaded === totalTextures) {
