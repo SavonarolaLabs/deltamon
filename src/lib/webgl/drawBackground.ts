@@ -9,6 +9,8 @@ export function drawBackground(
 	const canvasHeight = gl.canvas.height;
 
 	// Aspect ratio of the background image (1280 / 720)
+
+	//const imageAspectRatio = 1600 / 1093;
 	const imageAspectRatio = 1280 / 720;
 	const canvasAspectRatio = canvasWidth / canvasHeight;
 
@@ -55,5 +57,6 @@ export function drawBackground(
 	gl.uniform1i(samplerUniform, 0);
 
 	// Draw the background quad
+
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }

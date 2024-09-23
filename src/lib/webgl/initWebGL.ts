@@ -3,17 +3,19 @@ import { drawScene } from './draw';
 import { initShaders } from './shaders';
 import { loadCreatureTexture } from './textures';
 
-export function initWebGL(
-	canvas: HTMLCanvasElement,
-	gameState: any,
-	alpha: false
-): {
+interface WebGLInitResult {
 	gl: WebGLRenderingContext;
 	shaderProgram: WebGLProgram;
 	buffers: any;
-} | null {
+}
+
+export function initWebGL(
+	canvas: HTMLCanvasElement,
+	gameState: any,
+	alpha: boolean = false
+): WebGLInitResult | null {
 	// Get WebGL context
-	const gl = canvas.getContext('webgl', { alpha: true });
+	const gl = canvas.getContext('webgl', { alpha });
 
 	if (!gl) {
 		console.error('Unable to initialize WebGL. Your browser may not support it.');
@@ -21,10 +23,7 @@ export function initWebGL(
 	}
 
 	// Resize canvas to match display size
-	const displayWidth = canvas.clientWidth;
-	const displayHeight = canvas.clientHeight;
-	canvas.width = displayWidth;
-	canvas.height = displayHeight;
+	resizeCanvasToDisplaySize(canvas);
 	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
 	// Initialize shaders and buffers
@@ -35,6 +34,7 @@ export function initWebGL(
 	}
 	const buffers = initBuffers(gl);
 
+	// Enable alpha blending
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -42,5 +42,18 @@ export function initWebGL(
 	gl.clearColor(0.0, 0.0, 0.0, 1.0); // Black background
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
 	return { gl, shaderProgram, buffers };
+}
+
+function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement): void {
+	const { width, height } = canvas.getBoundingClientRect();
+	if (canvas.width !== width || canvas.height !== height) {
+		canvas.width = width;
+		canvas.height = height;
+	}
 }

@@ -43,7 +43,7 @@
 
 		console.log('Loading textures...');
 
-		backgroundTexture = await loadBackgroundTexture(gl, 'castle.png');
+		backgroundTexture = await loadBackgroundTexture(gl, 'current.png');
 
 		const creatureTexturePromises = game.slots
 			.filter(slot => slot.creature)
