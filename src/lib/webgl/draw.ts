@@ -31,7 +31,8 @@ export function drawScene(
 	creatureTextures: { [key: string]: WebGLTexture },
 	backgroundTexture: WebGLTexture,
 	abilityTextures: { [key: string]: WebGLTexture[] },
-	currentFrame: number // Pass the current frame for the ability animation
+	currentAbilityName: string,
+	currentFrame: number // Current frame of the ability
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -53,15 +54,13 @@ export function drawScene(
 		}
 	});
 
-	// Draw the current frame of the ability in the middle
-	const abilityName = 'flame10';
-	const abilityFrames = abilityTextures[abilityName];
-
-	if (abilityFrames && abilityFrames.length > 0) {
-		const frame = abilityFrames[currentFrame];
+	// Draw the current ability frame in the middle of the screen
+	const currentAbilityFrames = abilityTextures[currentAbilityName];
+	if (currentAbilityFrames && currentAbilityFrames.length > 0) {
+		const frame = currentAbilityFrames[currentFrame];
 		const centerX = 0;
 		const centerY = 0;
-		const scale = 0.5; // Adjust scale as needed
+		const scale = 0.5; // Adjust scale if needed
 		drawAbility(
 			gl,
 			shaderProgram,
@@ -75,7 +74,7 @@ export function drawScene(
 	}
 }
 
-// Draw an ability texture in a given position with scaling
+// Function to draw the ability texture
 function drawAbility(
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
@@ -93,14 +92,12 @@ function drawAbility(
 	let scaleX = scale;
 	let scaleY = scaleX / imgAspectRatio;
 
-	// Adjust scaling to maintain aspect ratio relative to the canvas
 	if (canvasAspectRatio > 1) {
 		scaleX /= canvasAspectRatio;
 	} else {
 		scaleY *= canvasAspectRatio;
 	}
 
-	// Create modified positions to render the ability in the center
 	const modifiedPositions = new Float32Array([
 		-scaleX + x,
 		scaleY + y, // Top-left
@@ -117,7 +114,6 @@ function drawAbility(
 	gl.enableVertexAttribArray(positionAttribute);
 	gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
 
-	// Bind texture and texture coordinates
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 
@@ -128,7 +124,6 @@ function drawAbility(
 	const samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler');
 	gl.uniform1i(samplerUniform, 0);
 
-	// Draw the textured quad
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
