@@ -1,13 +1,10 @@
-import type { BattleCreature, Creature, GameState } from "$lib/types";
-import { creatures } from "./creatures";
+import type { BattleCreature, Creature, GameState } from '$lib/types';
+import { creatures } from './creatures';
 
 export const P1 = 1;
 export const P2 = 2;
 
-function toBattleCreature(
-	playerId: number,
-	creature: Creature
-): BattleCreature {
+function toBattleCreature(playerId: number, creature: Creature): BattleCreature {
 	const c: BattleCreature = {
 		bcId: crypto.randomUUID(),
 		...creature,
@@ -25,15 +22,15 @@ function toBattleCreature(
 
 export const game: GameState = {
 	players: [
-		{ id: 1, name: "Player 1" },
-		{ id: 2, name: "Player 2" },
+		{ id: 1, name: 'Player 1' },
+		{ id: 2, name: 'Player 2' },
 	],
 	slots: [
 		{ creature: null },
 		{ creature: null },
 		//{ creature: toBattleCreature(1, creatures[13]) },
 		{ creature: null },
-		{ creature: toBattleCreature(1, creatures[10 - 1]) },
+		{ creature: toBattleCreature(1, creatures[9]) },
 		{ creature: null },
 		{ creature: null },
 

@@ -1,4 +1,3 @@
-// Core function for loading textures with Promises
 function loadTextureFromPath(
 	gl: WebGLRenderingContext,
 	imageUrl: string,
@@ -28,7 +27,6 @@ function loadTextureFromPath(
 	});
 }
 
-// Functions to load specific textures
 export function loadCreatureTexture(
 	gl: WebGLRenderingContext,
 	imageUrl: string
