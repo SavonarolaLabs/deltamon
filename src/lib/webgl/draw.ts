@@ -2,11 +2,12 @@ import { game } from '$lib/pvp/game';
 import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
+const GAP = 0.1;
 // prettier-ignore
 const slotPositions = [
 	[-0.75, 0.7], [-0.25, 0.7], [0.25, 0.7], [0.75, 0.7],  // Row 1
-	[-0.75, 0.2], [-0.25, 0.2], [0.25, 0.2], [0.75, 0.2],  // Row 2
-	[-0.75, -0.3], [-0.25, -0.3], [0.25, -0.3], [0.75, -0.3] // Row 3
+	[-0.75, 0.2-GAP], [-0.25, 0.2-GAP], [0.25, 0.2-GAP], [0.75, 0.2-GAP],  // Row 2
+	[-0.75, -0.3-GAP*2], [-0.25, -0.3-GAP*2], [0.25, -0.3-GAP*2], [0.75, -0.3-GAP*2] // Row 3
 ];
 
 function slotIndex(index: number): number {
