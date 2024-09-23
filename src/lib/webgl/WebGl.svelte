@@ -3,7 +3,8 @@
 	import { initWebGL } from '$lib/webgl/initWebGL';
 	import { game } from '$lib/pvp/game';
 	import { drawScene } from './draw';
-	import { loadBackgroundTexture, loadCreatureTexture } from './textures';
+	import { loadBackgroundTexture, loadCreatureTexture, loadAbilityTextures } from './textures';
+	import { abilityFolders } from './abilityFolders';
 
 	let canvas: HTMLCanvasElement;
 	let gl: WebGLRenderingContext | null;
@@ -11,6 +12,7 @@
 	let buffers: any;
 	let backgroundTexture: WebGLTexture | null = null;
 	let creatureTextures: { [key: string]: WebGLTexture } = {};
+	let abilityTextures: { [key: string]: WebGLTexture[] } = {}; // Store textures for abilities
 
 	async function loadTextures() {
 		if (!gl) return;
@@ -25,10 +27,17 @@
 				});
 			});
 
+		// Load all ability textures
+		const abilityTexturePromises = abilityFolders.map(folder => {
+			return loadAbilityTextures(gl, folder).then(textures => {
+				abilityTextures[folder.name] = textures;
+			});
+		});
+
 		// Wait for all textures to load before proceeding
 		try {
 			backgroundTexture = await backgroundTexturePromise;
-			await Promise.all(creatureTexturePromises);
+			await Promise.all([...creatureTexturePromises, ...abilityTexturePromises]);
 		} catch (error) {
 			console.error('Failed to load textures:', error);
 		}
@@ -52,7 +61,7 @@
 		if (!gl || !shaderProgram || !buffers || !backgroundTexture) return;
 
 		resizeCanvasToDisplaySize();
-		drawScene(gl, shaderProgram, creatureTextures, backgroundTexture);
+		drawScene(gl, shaderProgram, creatureTextures, backgroundTexture, abilityTextures); // Pass ability textures
 	}
 
 	async function initialize() {
@@ -88,6 +97,9 @@
 			// Delete textures
 			if (backgroundTexture) gl.deleteTexture(backgroundTexture);
 			Object.values(creatureTextures).forEach(texture => gl.deleteTexture(texture));
+			Object.values(abilityTextures).forEach(textureArray => {
+				textureArray.forEach(texture => gl.deleteTexture(texture));
+			});
 		}
 	});
 </script>

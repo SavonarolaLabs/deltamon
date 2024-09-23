@@ -40,3 +40,19 @@ export function loadBackgroundTexture(
 ): Promise<WebGLTexture> {
 	return loadTextureFromPath(gl, imageUrl, '/bg/');
 }
+
+export async function loadAbilityTextures(
+	gl: WebGLRenderingContext,
+	abilityFolder: { name: string; path: string; frameCount: number }
+): Promise<WebGLTexture[]> {
+	const textures: WebGLTexture[] = [];
+	const basePath = abilityFolder.path + '/';
+
+	for (let i = 0; i < abilityFolder.frameCount; i++) {
+		const frameName = `${i.toString().padStart(4, '0')}.png`;
+		const texture = await loadTextureFromPath(gl, frameName, basePath);
+		textures.push(texture);
+	}
+
+	return textures;
+}
