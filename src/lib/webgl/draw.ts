@@ -2,6 +2,28 @@ import { game } from '$lib/pvp/game';
 import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
+// prettier-ignore
+const slotPositions = [
+	[-0.75, 0.7], [-0.25, 0.7], [0.25, 0.7], [0.75, 0.7],  // Row 1
+	[-0.75, 0.2], [-0.25, 0.2], [0.25, 0.2], [0.75, 0.2],  // Row 2
+	[-0.75, -0.3], [-0.25, -0.3], [0.25, -0.3], [0.75, -0.3] // Row 3
+];
+
+function slotIndex(index: number): number {
+	// prettier-ignore
+	const indexMap = [
+		0, 1, 4, 5, 8, 9,
+		2, 3, 6, 7, 10, 11
+	];
+
+	return indexMap[index];
+}
+
+function getSlotPosition(index: number): [number, number] {
+	// @ts-ignore
+	return slotPositions[slotIndex(index)];
+}
+
 export function drawScene(
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
@@ -10,19 +32,13 @@ export function drawScene(
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
-	// Get buffers ready
 	const { positionBuffer, textureCoordBuffer } = initBuffers(gl);
-
-	// Draw background first
 	drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundTexture);
-
-	// Now draw the creatures after the background
 	game.slots.forEach((slot, index) => {
 		if (slot.creature) {
-			const texture = creatureTextures[slot.creature.img]; // Access the texture using .img
+			const texture = creatureTextures[slot.creature.img];
 			if (texture) {
-				const x = calculateXPosition(index);
-				const y = calculateYPosition(index);
+				const [x, y] = getSlotPosition(index);
 				drawSlot(gl, shaderProgram, positionBuffer, textureCoordBuffer, texture, x, y);
 			} else {
 				console.error(`Texture not found for creature img: ${slot.creature.img}`);
@@ -42,7 +58,7 @@ function drawSlot(
 ) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-	const s = 0.5;
+	const s = 0.22;
 	//prettier-ignore
 	const modifiedPositions = new Float32Array([
 		-s + x,  s + y,   // Top-left
@@ -69,19 +85,4 @@ function drawSlot(
 
 	// Draw the textured quad
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-}
-
-function calculateXPosition(index: number): number {
-	// Left side (slots 0, 2, 4) and right side (slots 6, 8, 10)
-	return index < 6 ? -0.75 : 0.75;
-}
-
-function calculateYPosition(index: number): number {
-	// Rows are based on the modulo of index within each side
-	const rowIndex = Math.floor((index % 6) / 2);
-	const baseY = 0.7;
-	const rowHeight = 0.6;
-
-	// Adjust the Y position based on the row
-	return baseY - rowIndex * rowHeight;
 }
