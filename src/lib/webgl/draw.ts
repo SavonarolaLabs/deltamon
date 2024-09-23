@@ -58,13 +58,24 @@ function drawSlot(
 ) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-	const s = 0.22;
-	//prettier-ignore
+	const canvasAspectRatio = gl.canvas.width / gl.canvas.height;
+	const imgAspectRatio = 1; // Assuming your images have a 1:1 aspect ratio, adjust if necessary
+	let scaleX = 0.25;
+	let scaleY = scaleX / imgAspectRatio;
+
+	// Adjust scaling to maintain aspect ratio relative to the canvas
+	if (canvasAspectRatio > 1) {
+		scaleX /= canvasAspectRatio;
+	} else {
+		scaleY *= canvasAspectRatio;
+	}
+
+	// prettier-ignore
 	const modifiedPositions = new Float32Array([
-		-s + x,  s + y,   // Top-left
-		-s + x, -s + y,   // Bottom-left
-		 s + x,  s + y,   // Top-right
-		 s + x, -s + y,   // Bottom-right
+		-scaleX + x,  scaleY + y,   // Top-left
+		-scaleX + x, -scaleY + y,   // Bottom-left
+		 scaleX + x,  scaleY + y,   // Top-right
+		 scaleX + x, -scaleY + y,   // Bottom-right
 	]);
 	gl.bufferData(gl.ARRAY_BUFFER, modifiedPositions, gl.STATIC_DRAW);
 
