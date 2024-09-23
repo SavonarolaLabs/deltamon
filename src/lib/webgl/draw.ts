@@ -2,12 +2,12 @@ import { game } from '$lib/pvp/game';
 import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
-const GAP = 0.1;
+const GAP = 0.15;
 // prettier-ignore
 const slotPositions = [
-    [-0.75, 0.7], [-0.25, 0.7], [0.25, 0.7], [0.75, 0.7],  // Row 1
-    [-0.75, 0.2-GAP], [-0.25, 0.2-GAP], [0.25, 0.2-GAP], [0.75, 0.2-GAP],  // Row 2
-    [-0.75, -0.3-GAP*2], [-0.25, -0.3-GAP*2], [0.25, -0.3-GAP*2], [0.75, -0.3-GAP*2] // Row 3
+    [-0.65, 0.6],        [-0.37, 0.6], [0.37, 0.6], [0.65, 0.6],  // Row 1
+    [-0.65, 0.15-GAP],    [-0.37, 0.15-GAP], [0.37, 0.15-GAP], [0.65, 0.15-GAP],  // Row 2
+    [-0.65, -0.3-GAP*2], [-0.37, -0.3-GAP*2], [0.37, -0.3-GAP*2], [0.65, -0.3-GAP*2] // Row 3
 ];
 
 // prettier-ignore
@@ -100,8 +100,8 @@ function drawAbility(
 	textureCoordAttribute: number
 ) {
 	const { scaleX, scaleY } = calculateScaling(gl, scale, 1);
-	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
-	bindTextureAndCoords(gl, texture, textureCoordBuffer, textureCoordAttribute);
+	setPositionBuffer(gl, positionBuffer, x + 0.33, y - 0.14, scaleX, scaleY, positionAttribute);
+	bindTextureAndCoordsFlipped(gl, texture, textureCoordBuffer, textureCoordAttribute);
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
@@ -116,7 +116,7 @@ function drawSlot(
 	positionAttribute: number,
 	textureCoordAttribute: number
 ) {
-	const { scaleX, scaleY } = calculateScaling(gl, 0.2, 1);
+	const { scaleX, scaleY } = calculateScaling(gl, 0.19, 1);
 	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
 	bindTextureAndCoords(gl, texture, textureCoordBuffer, textureCoordAttribute);
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -168,5 +168,25 @@ function bindTextureAndCoords(
 ) {
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+}
+
+function bindTextureAndCoordsFlipped(
+	gl: WebGLRenderingContext,
+	texture: WebGLTexture,
+	textureCoordBuffer: WebGLBuffer,
+	textureCoordAttribute: number
+) {
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+
+	//prettier-ignore
+	const flippedTexCoords = new Float32Array([
+		1.0, 0.0, // Top-right
+		1.0, 1.0, // Bottom-right
+		0.0, 0.0, // Top-left
+		0.0, 1.0  // Bottom-left
+	]);
+	gl.bufferData(gl.ARRAY_BUFFER, flippedTexCoords, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
 }
