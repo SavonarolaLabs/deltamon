@@ -12,94 +12,105 @@
 	let buffers: any;
 	let backgroundTexture: WebGLTexture | null = null;
 	let creatureTextures: { [key: string]: WebGLTexture } = {};
-	let abilityTextures: { [key: string]: WebGLTexture[] } = {}; // Store textures for abilities
+	let abilityTextures: { [key: string]: WebGLTexture[] } = {};
 
-	async function loadTextures() {
-		if (!gl) return;
+	// Variables for animation
+	let currentFrame = 0;
+	const animationSpeed = 30;
+	let lastTime = 0;
 
-		// Load the background and creature textures simultaneously
-		const backgroundTexturePromise = loadBackgroundTexture(gl, 'castle.png');
-		const creatureTexturePromises = game.slots
-			.filter(slot => slot.creature && !creatureTextures[slot.creature.img]) // Filter valid slots
-			.map(slot => {
-				return loadCreatureTexture(gl, `${slot.creature!.img}`).then(texture => {
-					creatureTextures[slot.creature!.img] = texture;
-				});
-			});
-
-		// Load all ability textures
-		const abilityTexturePromises = abilityFolders.map(folder => {
-			return loadAbilityTextures(gl, folder).then(textures => {
-				abilityTextures[folder.name] = textures;
-			});
-		});
-
-		// Wait for all textures to load before proceeding
-		try {
-			backgroundTexture = await backgroundTexturePromise;
-			await Promise.all([...creatureTexturePromises, ...abilityTexturePromises]);
-		} catch (error) {
-			console.error('Failed to load textures:', error);
-		}
-	}
-
-	function resizeCanvasToDisplaySize() {
-		if (!canvas || !gl) return;
-
-		const displayWidth = canvas.clientWidth;
-		const displayHeight = canvas.clientHeight;
-
-		if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-			canvas.width = displayWidth;
-			canvas.height = displayHeight;
-		}
-
-		gl.viewport(0, 0, canvas.width, canvas.height);
-	}
-
-	function draw() {
-		if (!gl || !shaderProgram || !buffers || !backgroundTexture) return;
-
-		resizeCanvasToDisplaySize();
-		drawScene(gl, shaderProgram, creatureTextures, backgroundTexture, abilityTextures); // Pass ability textures
-	}
-
-	async function initialize() {
-		const result = initWebGL(canvas, game);
-		if (result) {
-			({ gl, shaderProgram, buffers } = result);
-
-			// Load textures first
-			await loadTextures();
-
-			// Draw the scene once the textures are loaded
-			draw();
-
-			// Add resize event listener to redraw on resize
-			window.addEventListener('resize', draw);
-		} else {
-			console.error('WebGL initialization failed');
-		}
-	}
-
-	onMount(() => {
-		initialize();
-	});
-
-	onDestroy(() => {
-		window.removeEventListener('resize', draw);
-
-		// Clean up WebGL resources
+	function clearTextures() {
 		if (gl) {
-			gl.deleteProgram(shaderProgram);
-			gl.deleteBuffer(buffers.positionBuffer);
-			gl.deleteBuffer(buffers.textureCoordBuffer);
-			// Delete textures
 			if (backgroundTexture) gl.deleteTexture(backgroundTexture);
 			Object.values(creatureTextures).forEach(texture => gl.deleteTexture(texture));
 			Object.values(abilityTextures).forEach(textureArray => {
 				textureArray.forEach(texture => gl.deleteTexture(texture));
 			});
+		}
+
+		backgroundTexture = null;
+		creatureTextures = {};
+		abilityTextures = {};
+	}
+
+	async function loadTextures() {
+		if (!gl) return;
+
+		clearTextures();
+
+		console.log('Loading textures...');
+
+		backgroundTexture = await loadBackgroundTexture(gl, 'castle.png');
+
+		const creatureTexturePromises = game.slots
+			.filter(slot => slot.creature)
+			.map(async slot => {
+				creatureTextures[slot.creature!.img] = await loadCreatureTexture(
+					gl,
+					`${slot.creature!.img}`
+				);
+			});
+
+		const abilityTexturePromises = abilityFolders.map(async folder => {
+			abilityTextures[folder.name] = await loadAbilityTextures(gl, folder);
+		});
+
+		await Promise.all([...creatureTexturePromises, ...abilityTexturePromises]);
+
+		console.log('Textures loaded:', {
+			backgroundTexture,
+			creatureTextures: Object.keys(creatureTextures),
+			abilityTextures: Object.keys(abilityTextures),
+		});
+	}
+
+	function animate(time: number) {
+		const elapsedTime = time - lastTime;
+		if (elapsedTime >= animationSpeed) {
+			currentFrame = (currentFrame + 1) % (abilityTextures['flame10']?.length || 1);
+			lastTime = time;
+		}
+
+		console.log(
+			'Drawing scene with creatures:',
+			game.slots.map(slot => slot.creature?.img).filter(Boolean)
+		);
+
+		drawScene(
+			gl,
+			shaderProgram,
+			creatureTextures,
+			backgroundTexture,
+			abilityTextures,
+			currentFrame
+		);
+		requestAnimationFrame(animate);
+	}
+
+	async function initialize() {
+		console.log('Initializing WebGL...');
+		const result = initWebGL(canvas, game);
+		if (result) {
+			({ gl, shaderProgram, buffers } = result);
+			await loadTextures();
+			requestAnimationFrame(animate);
+		}
+	}
+
+	onMount(() => {
+		console.log('Component mounted');
+		initialize();
+	});
+
+	onDestroy(() => {
+		console.log('Component destroyed');
+		window.cancelAnimationFrame(animate);
+
+		clearTextures();
+		if (gl) {
+			gl.deleteProgram(shaderProgram);
+			gl.deleteBuffer(buffers.positionBuffer);
+			gl.deleteBuffer(buffers.textureCoordBuffer);
 		}
 	});
 </script>

@@ -30,7 +30,8 @@ export function drawScene(
 	shaderProgram: WebGLProgram,
 	creatureTextures: { [key: string]: WebGLTexture },
 	backgroundTexture: WebGLTexture,
-	abilityTextures: { [key: string]: WebGLTexture[] } // New parameter for ability textures
+	abilityTextures: { [key: string]: WebGLTexture[] },
+	currentFrame: number // Pass the current frame for the ability animation
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -52,19 +53,15 @@ export function drawScene(
 		}
 	});
 
-	// Draw one ability frame in the middle of the screen
-	const abilityName = 'flame10'; // Choose the ability
+	// Draw the current frame of the ability in the middle
+	const abilityName = 'flame10';
 	const abilityFrames = abilityTextures[abilityName];
 
 	if (abilityFrames && abilityFrames.length > 0) {
-		const frame = abilityFrames[0]; // Draw the first frame of the ability
-
-		// Coordinates for the center of the screen
+		const frame = abilityFrames[currentFrame];
 		const centerX = 0;
 		const centerY = 0;
-
-		// Scale larger for ability effect in the center
-		const scale = 0.5; // Adjust this as necessary to change size
+		const scale = 0.5; // Adjust scale as needed
 		drawAbility(
 			gl,
 			shaderProgram,
@@ -75,8 +72,6 @@ export function drawScene(
 			centerY,
 			scale
 		);
-	} else {
-		console.error(`Ability textures not found for ${abilityName}`);
 	}
 }
 
