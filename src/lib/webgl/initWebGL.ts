@@ -5,7 +5,8 @@ import { loadCreatureTexture } from './textures';
 
 export function initWebGL(
 	canvas: HTMLCanvasElement,
-	gameState: any
+	gameState: any,
+	alpha: false
 ): {
 	gl: WebGLRenderingContext;
 	shaderProgram: WebGLProgram;
@@ -40,24 +41,6 @@ export function initWebGL(
 	// Set clear color and clear the screen
 	gl.clearColor(0.0, 0.0, 0.0, 1.0); // Black background
 	gl.clear(gl.COLOR_BUFFER_BIT);
-
-	// Load creature textures (asynchronously)
-	const creatureTextures: { [key: string]: WebGLTexture } = {};
-	let texturesLoaded = 0;
-	const totalTextures = gameState.slots.filter((slot: any) => slot.creature).length;
-
-	gameState.slots.forEach((slot: any) => {
-		if (slot.creature) {
-			loadCreatureTexture(gl, slot.creature.img, texture => {
-				creatureTextures[slot.creature.bcId] = texture;
-				texturesLoaded++;
-				if (texturesLoaded === totalTextures) {
-					// All textures loaded, now draw the scene
-					drawScene(gl, shaderProgram, creatureTextures);
-				}
-			});
-		}
-	});
 
 	return { gl, shaderProgram, buffers };
 }

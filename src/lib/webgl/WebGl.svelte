@@ -16,7 +16,7 @@
 
 	// Variables for animation
 	let currentFrame = 0;
-	const animationSpeed = 30;
+	const animationSpeed = 20;
 	let lastTime = 0;
 
 	function clearTextures() {
@@ -105,7 +105,6 @@
 	onDestroy(() => {
 		console.log('Component destroyed');
 		window.cancelAnimationFrame(animate);
-
 		clearTextures();
 		if (gl) {
 			gl.deleteProgram(shaderProgram);
