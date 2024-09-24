@@ -132,7 +132,7 @@ function drawSlot(
 
 function calculateScaling(gl: WebGLRenderingContext, scale: number, imgAspectRatio: number) {
 	const canvasAspectRatio = gl.canvas.width / gl.canvas.height;
-	const cardAspectRatio = 355 / 542; // Aspect ratio for your cards
+	const cardAspectRatio = 614 / 868; // Aspect ratio for your cards
 
 	let scaleX = scale;
 	let scaleY = scaleX / cardAspectRatio; // Use the card aspect ratio
