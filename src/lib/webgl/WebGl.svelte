@@ -120,6 +120,10 @@
 			currentFrame = 0;
 			spellPositionX = spellPositionStart;
 			isAbilityActive = true;
+		} else if (key === 'W') {
+			currentFrame = 0;
+			spellPositionX = spellPositionStart;
+			isAbilityActive = true;
 		}
 	}
 
