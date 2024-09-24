@@ -1,4 +1,4 @@
-import { DamageType } from "$lib/pvp/constants";
+import type { DamageType } from '$lib/pvp/constants';
 
 export type Creature = {
 	id: number;
@@ -15,7 +15,7 @@ export type Creature = {
 };
 
 export type CretureSkill = {
-	name: "";
+	name: '';
 };
 
 export type Slot = {

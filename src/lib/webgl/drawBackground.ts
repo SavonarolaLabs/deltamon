@@ -11,7 +11,7 @@ export function drawBackground(
 	// Aspect ratio of the background image (1280 / 720)
 
 	//const imageAspectRatio = 1600 / 1093;
-	const imageAspectRatio = 1280 / 720;
+	const imageAspectRatio = 1792 / 1024;
 	const canvasAspectRatio = canvasWidth / canvasHeight;
 
 	let width, height;

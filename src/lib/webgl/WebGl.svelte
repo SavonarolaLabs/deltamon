@@ -87,6 +87,7 @@
 		}
 
 		drawScene(
+			game,
 			gl,
 			shaderProgram,
 			creatureTextures,

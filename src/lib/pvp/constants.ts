@@ -4,6 +4,7 @@ export const PURE = 2;
 export const ICE = 3;
 export const FIRE = 4;
 
+//prettier-ignore
 export type DamageType =
 	| typeof PHYSICAL
 	| typeof PURE

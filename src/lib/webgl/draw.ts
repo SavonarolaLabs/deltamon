@@ -1,4 +1,4 @@
-import { game } from '$lib/pvp/game';
+import type { GameState } from '$lib/types';
 import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
@@ -21,6 +21,7 @@ function getSlotPosition(index: number): [number, number] {
 }
 
 export function drawScene(
+	game: GameState,
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
 	creatureTextures: { [key: string]: WebGLTexture },
