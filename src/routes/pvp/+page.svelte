@@ -1,33 +1,27 @@
 <script lang="ts">
-	import { base } from "$app/paths";
-	import Navigation from "$lib/Navigation.svelte";
-	import { game } from "$lib/pvp/game";
-	import { endTurn, startMatch } from "$lib/pvp/gameloop";
-	import SlotComponent from "$lib/SlotComponent.svelte";
-	import { onMount, tick } from "svelte";
-	import CreaturePanel from "$lib/CreaturePanel.svelte";
-	import {
-		click_mode,
-		CLICK_MODE_ATTACK,
-		selected_creature,
-	} from "$lib/pvpuistate";
-	import { useAbility } from "$lib/pvp/combat";
-	import type { GameState } from "$lib/types";
+	import { base } from '$app/paths';
+	import Navigation from '$lib/Navigation.svelte';
+	import { game } from '$lib/pvp/game';
+	import { endTurn, startMatch } from '$lib/pvp/gameloop';
+	import SlotComponent from '$lib/SlotComponent.svelte';
+	import { onMount, tick } from 'svelte';
+	import CreaturePanel from '$lib/CreaturePanel.svelte';
+	import { click_mode, CLICK_MODE_ATTACK, selected_creature } from '$lib/pvpuistate';
+	import { useAbility } from '$lib/pvp/combat';
+	import type { GameState } from '$lib/types';
 
 	let logs: string[] = [];
 	let logContainer: HTMLDivElement;
 
 	function updateCursor() {
 		document.body.style.cursor =
-			$click_mode === CLICK_MODE_ATTACK
-				? `url(${base}/cursor/sword.cur), auto`
-				: "default";
+			$click_mode === CLICK_MODE_ATTACK ? `url(${base}/cursor/sword.cur), auto` : 'default';
 	}
 
 	function setTargetableCreatures(game: GameState): GameState {
 		const activePlayer = game.activeCreature?.playerId;
-		console.log("setTargetableCreatures: ");
-		game.slots.forEach((slot) => {
+		console.log('setTargetableCreatures: ');
+		game.slots.forEach(slot => {
 			if (slot?.creature && slot.creature.playerId !== activePlayer) {
 				slot.creature.isTargetCandidate = true;
 			} else {
@@ -40,7 +34,7 @@
 	}
 
 	function unsetTargetableCreatures(game: GameState): GameState {
-		game.slots.forEach((slot) => {
+		game.slots.forEach(slot => {
 			if (slot?.creature) {
 				slot.creature.isTargetCandidate = false;
 			}
@@ -49,7 +43,7 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (event.key.toLowerCase() === "a") {
+		if (event.key.toLowerCase() === 'a') {
 			if ($click_mode == CLICK_MODE_ATTACK) {
 				return;
 			}
@@ -57,7 +51,7 @@
 			setTargetableCreatures(game);
 			game.slots = game.slots;
 			updateCursor();
-		} else if (event.key === "Escape") {
+		} else if (event.key === 'Escape') {
 			if ($click_mode == CLICK_MODE_ATTACK) {
 				unsetTargetableCreatures(game);
 				game.slots = game.slots;
@@ -66,18 +60,18 @@
 				selected_creature.set(null);
 			}
 			updateCursor();
-		} else if (event.key === " ") {
+		} else if (event.key === ' ') {
 			event.preventDefault();
 			if (game.gameOver || !game.currentRound) {
 				startMatch(game);
-				logEvent("Match started.");
+				logEvent('Match started.');
 			} else {
 				endTurn(game);
-				logEvent("next turn");
+				logEvent('next turn');
 			}
 			game.slots = game.slots;
 			game.activeCreature = game.activeCreature;
-		} else if (event.key.toLowerCase() === "s") {
+		} else if (event.key.toLowerCase() === 's') {
 			game.currentRound = game.currentRound;
 			game.activeCreature = game.activeCreature;
 		}
@@ -105,7 +99,7 @@
 
 	function handleChildUpdate(event: CustomEvent) {
 		const msg = event.detail;
-		if (msg?.action == "attack") {
+		if (msg?.action == 'attack') {
 			const sourceId = game.activeCreature?.bcId!;
 			//attack(game, sourceId, [msg.targetId]);
 			useAbility(
@@ -128,10 +122,7 @@
 
 <svelte:window on:keydown={handleKeyDown} />
 
-<div
-	class="h-full flex flex-col bg-arena"
-	style="background-image:url('https://i.pinimg.com/originals/18/2a/a3/182aa350a17925b3b228fe9b760da4c7.jpg')"
->
+<div class="h-full flex flex-col bg-arena" style="background-image:url('/bg/current.png')">
 	<div class="w-full fixed">
 		<Navigation></Navigation>
 	</div>
@@ -149,9 +140,7 @@
 			{/if}
 		</div>
 
-		<main
-			class="flex justify-center items-center text-sm mt-8 justify-around"
-		>
+		<main class="flex justify-center items-center text-sm mt-8 justify-around">
 			<!-- Left side: 6 creatures -->
 			<div class="flex flex-col gap-2">
 				{#each [0, 2, 4] as rowStart}

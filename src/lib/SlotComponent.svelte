@@ -1,16 +1,11 @@
 <script lang="ts">
-	import { base } from "$app/paths";
-	import type { Slot } from "./types";
-	import { game } from "$lib/pvp/game";
-	import {
-		click_mode,
-		CLICK_MODE_ATTACK,
-		selected_creature,
-	} from "./pvpuistate";
-	import { createEventDispatcher, onMount } from "svelte";
-	import DmgNumber from "./DmgNumber.svelte";
-	import { writable } from "svelte/store";
-	import Tri from "./Tri.svelte";
+	import { base } from '$app/paths';
+	import type { Slot } from './types';
+	import { game } from '$lib/pvp/game';
+	import { click_mode, CLICK_MODE_ATTACK, selected_creature } from './pvpuistate';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import DmgNumber from './DmgNumber.svelte';
+	import { writable } from 'svelte/store';
 
 	export let slot: Slot;
 	export let index: number;
@@ -57,7 +52,7 @@
 		) {
 			slot.creature.isHoveredTarget = false;
 			notifyParent({
-				action: "attack",
+				action: 'attack',
 				targetId: slot.creature.bcId,
 			});
 			return;
@@ -66,7 +61,7 @@
 		if (slot.creature && !slot.creature.isSelected) {
 			selected_creature.set(slot.creature);
 
-			game.slots.forEach((s) => {
+			game.slots.forEach(s => {
 				if (s.creature && s !== slot) {
 					s.creature.isSelected = false;
 				}
@@ -76,15 +71,11 @@
 
 	const dispatch = createEventDispatcher();
 	function notifyParent(action: any) {
-		dispatch("childUpdate", action);
+		dispatch('childUpdate', action);
 	}
 
 	function handleMouseEnter() {
-		if (
-			slot.creature &&
-			$click_mode != 0 &&
-			slot.creature?.isTargetCandidate
-		) {
+		if (slot.creature && $click_mode != 0 && slot.creature?.isTargetCandidate) {
 			slot.creature.isHoveredTarget = true;
 		}
 	}
@@ -101,13 +92,13 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
 	class:float-animation={slot.creature?.isActive}
-	style={slot.creature?.isActive ? "z-index:100;" : "z-index:10"}
+	style={slot.creature?.isActive ? 'z-index:100;' : 'z-index:10'}
 	on:mouseenter={handleMouseEnter}
 	on:mouseleave={handleMouseLeave}
 >
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div
-		class="creature-slot border-gray-300 border border-slate-400 rounded-md bg-white"
+		class="creature-slot border-gray-300 border border-slate-400 rounded-md"
 		class:cursor-pointer={!$click_mode && slot.creature}
 		class:cursor-not-allowed={$click_mode == CLICK_MODE_ATTACK &&
 			slot.creature?.playerId == game.activeCreature?.playerId}
@@ -137,7 +128,7 @@
 			{#if slot.creature}
 				<img
 					class="block mx-auto"
-					src={base + "/monster/" + slot.creature.img}
+					src={base + '/monster/' + slot.creature.img}
 					alt={slot.creature.name}
 					width="190"
 				/>
@@ -146,9 +137,7 @@
 					<div class="hp-bar-wrapper self-center">
 						<div
 							class="hp-bar"
-							style="width: {(slot.creature.hp /
-								slot.creature.maxHp) *
-								100}%;"
+							style="width: {(slot.creature.hp / slot.creature.maxHp) * 100}%;"
 						></div>
 					</div>
 				</div>
@@ -165,15 +154,15 @@
 
 <style>
 	.logo {
-		font-family: "Luckiest Guy", cursive;
+		font-family: 'Luckiest Guy', cursive;
 	}
 	.empty-slot {
 		opacity: 0.9;
 		background-color: rgba(0, 0, 0, 0.583);
 	}
 	.creature-slot {
-		width: 190px;
-		height: 234px;
+		width: 188px; /* Updated from 190px */
+		height: 266px; /* Updated from 234px */
 		position: relative;
 		overflow: hidden;
 		transition: transform 0.15s ease;
@@ -250,8 +239,6 @@
 	}
 
 	.content {
-		padding-top: 1rem;
-		padding-bottom: 0.5rem;
 		height: 100%;
 		display: flex;
 		flex-direction: column;

@@ -346,7 +346,17 @@ export const creatures = [
 		attack: 39,
 		defense: 13,
 		initiative: 13,
-		abilities: [attackAbility],
+		abilities: [attackAbility, fireballAbility, enchantAbility, evilEyeAbility, redBeamAbility],
+		dmgAmplifier: {
+			PHYSICAL: 1,
+			FIRE: 1.5,
+			ICE: 0.8,
+		},
+		dmgResistance: {
+			PHYSICAL: 1,
+			FIRE: 0.5,
+			ICE: 1.2,
+		},
 	},
 	{
 		id: 29,
@@ -1062,7 +1072,23 @@ export const creatures = [
 		attack: 43,
 		defense: 10,
 		initiative: 9,
-		abilities: [attackAbility],
+		abilities: [
+			attackAbility,
+			iceMissleAbility,
+			hasteAbility,
+			explosionAbility,
+			iceNovaAbility,
+		],
+		dmgAmplifier: {
+			PHYSICAL: 1.2,
+			FIRE: 0.7,
+			ICE: 1.5,
+		},
+		dmgResistance: {
+			PHYSICAL: 0.9,
+			FIRE: 1.3,
+			ICE: 0.5,
+		},
 	},
 	{
 		id: 94,
