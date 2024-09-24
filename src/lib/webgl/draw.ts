@@ -2,14 +2,17 @@ import type { GameState } from '$lib/types';
 import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
-const GAP = 0.15;
+const GY = 0.15;
+// prettier-ignore
+const X1 = 0.8, X2 = X1-0.3;
+// prettier-ignore
+const Y1 = 0.6, Y2 = Y1 - 0.45, Y3 = Y1-0.45*2;
 // prettier-ignore
 const slotPositions = [
-    [-0.65, 0.6],        [-0.37, 0.6], [0.37, 0.6], [0.65, 0.6],  // Row 1
-    [-0.65, 0.15-GAP],    [-0.37, 0.15-GAP], [0.37, 0.15-GAP], [0.65, 0.15-GAP],  // Row 2
-    [-0.65, -0.3-GAP*2], [-0.37, -0.3-GAP*2], [0.37, -0.3-GAP*2], [0.65, -0.3-GAP*2] // Row 3
+    [-X1, Y1],      [-X2, Y1],      [X2, Y1],      [X1, Y1],
+    [-X1, Y2-GY],   [-X2, Y2-GY],   [X2, Y2-GY],   [X1, Y2-GY],
+    [-X1, Y3-GY*2], [-X2, Y3-GY*2], [X2, Y3-GY*2], [X1, Y3-GY*2]
 ];
-
 // prettier-ignore
 const indexMap = [
     0, 1, 4, 5, 8, 9,
