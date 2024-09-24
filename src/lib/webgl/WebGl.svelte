@@ -14,14 +14,17 @@
 	let creatureTextures: { [key: string]: WebGLTexture } = {};
 	let abilityTextures: { [key: string]: WebGLTexture[] } = {};
 
-	// Variables for animation
 	let currentFrame = 0;
-	let currentAbilityIndex: number | null = null; // Start without ability animation
-	const animationSpeed = 30; // Speed of animation (ms per frame)
+	const animationSpeed = 30;
 	let lastTime = 0;
-	let isAbilityActive = false; // To track if an ability is playing
+	let isAbilityActive = true; // Always active for demo
+	let spellPositionStart = -0.4; // Start position on the left
+	let spellPositionEnd = 0.3; // Start position on the left
+	let spellPositionX = spellPositionStart; // Start position on the left
+	let spellPositionY = 0.05; // Start position on the left
+	const spellSpeed = 0.03; // Movement speed of the spell
 
-	// Function to clear textures
+	// Clear and load textures
 	function clearTextures() {
 		if (gl) {
 			if (backgroundTexture) gl.deleteTexture(backgroundTexture);
@@ -36,14 +39,10 @@
 		abilityTextures = {};
 	}
 
-	// Function to load textures
 	async function loadTextures() {
 		if (!gl) return;
 
 		clearTextures();
-
-		console.log('Loading textures...');
-
 		backgroundTexture = await loadBackgroundTexture(gl, 'current.png');
 
 		const creatureTexturePromises = game.slots
@@ -60,56 +59,52 @@
 		});
 
 		await Promise.all([...creatureTexturePromises, ...abilityTexturePromises]);
-
-		console.log('Textures loaded:', {
-			backgroundTexture,
-			creatureTextures: Object.keys(creatureTextures),
-			abilityTextures: Object.keys(abilityTextures),
-		});
 	}
 
-	// Function to animate abilities
+	// Animate spell movement from left to right
 	function animate(time: number) {
 		const elapsedTime = time - lastTime;
+		lastTime = time;
 
-		drawScene(gl, shaderProgram, creatureTextures, backgroundTexture, abilityTextures, null, 0);
+		// Move the spell to the right
+		spellPositionX += spellSpeed;
 
-		// If an ability is active, animate it
-		if (isAbilityActive && currentAbilityIndex !== null) {
-			const abilityNames = Object.keys(abilityTextures);
-			const currentAbilityName = abilityNames[currentAbilityIndex];
-			const currentAbilityFrames = abilityTextures[currentAbilityName] || [];
-
-			if (elapsedTime >= animationSpeed) {
-				// Update frame if not yet finished
-				currentFrame++;
-				lastTime = time;
-			}
-
-			if (currentFrame < currentAbilityFrames.length) {
-				// Draw the scene with the current ability frame
-				drawScene(
-					gl,
-					shaderProgram,
-					creatureTextures,
-					backgroundTexture,
-					abilityTextures,
-					currentAbilityName,
-					currentFrame
-				);
-			} else {
-				isAbilityActive = false;
-				currentAbilityIndex = null; // Reset ability index
-			}
+		// Update frames based on time and animation speed
+		if (elapsedTime >= animationSpeed) {
+			currentFrame++;
+			lastTime = time;
 		}
 
-		// Always request the next animation frame, regardless of the ability state
+		// Loop the frame if it reaches the end
+		if (currentFrame >= abilityTextures['flame10'].length) {
+			currentFrame = 0;
+			isAbilityActive = false;
+			spellPositionX = spellPositionStart;
+		}
+
+		if (spellPositionX > spellPositionEnd) {
+			spellPositionX = spellPositionEnd; // Reset to start on the left once it leaves the screen
+		}
+
+		drawScene(
+			gl,
+			shaderProgram,
+			creatureTextures,
+			backgroundTexture,
+			abilityTextures,
+			'flame10', // Spell name from abilityFolders
+			currentFrame,
+			spellPositionX, // Pass the X position of the spell
+			spellPositionY, // Y position remains static for now
+			isAbilityActive
+		);
+
+		// Request the next animation frame
 		requestAnimationFrame(animate);
 	}
 
-	// Function to initialize WebGL and start animation
+	// Initialize WebGL
 	async function initialize() {
-		console.log('Initializing WebGL...');
 		const result = initWebGL(canvas, game);
 		if (result) {
 			({ gl, shaderProgram, buffers } = result);
@@ -118,16 +113,22 @@
 		}
 	}
 
+	function handleKeydown(event: KeyboardEvent) {
+		const key = event.key.toUpperCase();
+		if (key === 'Q') {
+			currentFrame = 0;
+			spellPositionX = spellPositionStart;
+			isAbilityActive = true;
+		}
+	}
+
 	onMount(() => {
-		console.log('Component mounted');
 		initialize();
 		window.addEventListener('keydown', handleKeydown);
 	});
 
 	onDestroy(() => {
-		console.log('Component destroyed');
 		window.cancelAnimationFrame(animate);
-
 		clearTextures();
 		if (gl) {
 			gl.deleteProgram(shaderProgram);
@@ -136,26 +137,6 @@
 		}
 		window.removeEventListener('keydown', handleKeydown);
 	});
-
-	// Mapping of keys to ability indices
-	const keyToAbilityIndex = {
-		Q: 0,
-		W: 1,
-		E: 2,
-		R: 3,
-		D: 4,
-		F: 5,
-	};
-
-	function handleKeydown(event: KeyboardEvent) {
-		const key = event.key.toUpperCase();
-		if (keyToAbilityIndex[key] !== undefined) {
-			currentAbilityIndex = keyToAbilityIndex[key];
-			console.log({ currentAbilityIndex });
-			currentFrame = 0; // Reset the frame for the new ability
-			isAbilityActive = true; // Set the ability as active
-		}
-	}
 </script>
 
 <canvas bind:this={canvas}></canvas>

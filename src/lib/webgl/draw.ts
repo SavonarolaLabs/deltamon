@@ -27,7 +27,10 @@ export function drawScene(
 	backgroundTexture: WebGLTexture,
 	abilityTextures: { [key: string]: WebGLTexture[] },
 	currentAbilityName: string,
-	currentFrame: number
+	currentFrame: number,
+	spellPosX: number,
+	spellPosY: number,
+	drawSpell: boolean
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -68,7 +71,8 @@ export function drawScene(
 		}
 	});
 
-	// Draw the current ability frame in the middle of the screen
+	// Draw the ability (fireball) moving across the screen
+	if (!drawSpell) return;
 	const currentAbilityFrames = abilityTextures[currentAbilityName];
 	if (currentAbilityFrames && currentAbilityFrames.length > 0) {
 		const frame = currentAbilityFrames[currentFrame % currentAbilityFrames.length];
@@ -78,9 +82,9 @@ export function drawScene(
 			positionBuffer,
 			textureCoordBuffer,
 			frame,
-			0,
-			0,
-			0.5,
+			spellPosX, // X position for spell
+			spellPosY, // Y position for spell
+			0.3, // Scale of the spell
 			positionAttribute,
 			textureCoordAttribute
 		);
@@ -100,8 +104,8 @@ function drawAbility(
 	textureCoordAttribute: number
 ) {
 	const { scaleX, scaleY } = calculateScaling(gl, scale, 1);
-	setPositionBuffer(gl, positionBuffer, x + 0.33, y - 0.14, scaleX, scaleY, positionAttribute);
-	bindTextureAndCoordsFlipped(gl, texture, textureCoordBuffer, textureCoordAttribute);
+	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
+	bindTextureAndCoords(gl, texture, textureCoordBuffer, textureCoordAttribute);
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 

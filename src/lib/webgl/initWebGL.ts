@@ -1,7 +1,5 @@
 import { initBuffers } from './buffers';
-import { drawScene } from './draw';
 import { initShaders } from './shaders';
-import { loadCreatureTexture } from './textures';
 
 interface WebGLInitResult {
 	gl: WebGLRenderingContext;
