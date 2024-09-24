@@ -50,8 +50,9 @@ export function initWebGL(
 
 function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement): void {
 	const { width, height } = canvas.getBoundingClientRect();
-	if (canvas.width !== width || canvas.height !== height) {
-		canvas.width = width;
-		canvas.height = height;
-	}
+	const dpr = window.devicePixelRatio || 1;
+	canvas.width = width * dpr;
+	canvas.height = height * dpr;
+	canvas.style.width = `${width}px`;
+	canvas.style.height = `${height}px`;
 }
