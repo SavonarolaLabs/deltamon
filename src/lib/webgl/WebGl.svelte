@@ -16,9 +16,10 @@
 
 	// Variables for animation
 	let currentFrame = 0;
-	let currentAbilityIndex = 0;
+	let currentAbilityIndex: number | null = null; // Start without ability animation
 	const animationSpeed = 30; // Speed of animation (ms per frame)
 	let lastTime = 0;
+	let isAbilityActive = false; // To track if an ability is playing
 
 	// Function to clear textures
 	function clearTextures() {
@@ -71,39 +72,38 @@
 	function animate(time: number) {
 		const elapsedTime = time - lastTime;
 
-		// Get the current ability name and its textures
-		const abilityNames = Object.keys(abilityTextures);
-		const currentAbilityName = abilityNames[currentAbilityIndex];
-		const currentAbilityFrames = abilityTextures[currentAbilityName] || [];
+		drawScene(gl, shaderProgram, creatureTextures, backgroundTexture, abilityTextures, null, 0);
 
-		if (elapsedTime >= animationSpeed) {
-			// Update frame
-			currentFrame = (currentFrame + 1) % currentAbilityFrames.length;
-			lastTime = time;
+		// If an ability is active, animate it
+		if (isAbilityActive && currentAbilityIndex !== null) {
+			const abilityNames = Object.keys(abilityTextures);
+			const currentAbilityName = abilityNames[currentAbilityIndex];
+			const currentAbilityFrames = abilityTextures[currentAbilityName] || [];
 
-			// If we've looped through all frames of the current ability, move to the next one
-			if (currentFrame === 0) {
-				currentAbilityIndex = (currentAbilityIndex + 1) % abilityNames.length;
+			if (elapsedTime >= animationSpeed) {
+				// Update frame if not yet finished
+				currentFrame++;
+				lastTime = time;
+			}
+
+			if (currentFrame < currentAbilityFrames.length) {
+				// Draw the scene with the current ability frame
+				drawScene(
+					gl,
+					shaderProgram,
+					creatureTextures,
+					backgroundTexture,
+					abilityTextures,
+					currentAbilityName,
+					currentFrame
+				);
+			} else {
+				isAbilityActive = false;
+				currentAbilityIndex = null; // Reset ability index
 			}
 		}
 
-		console.log(
-			'Drawing scene with creatures:',
-			game.slots.map(slot => slot.creature?.img).filter(Boolean)
-		);
-
-		// Draw the scene with the current frame of the current ability
-		drawScene(
-			gl,
-			shaderProgram,
-			creatureTextures,
-			backgroundTexture,
-			abilityTextures,
-			currentAbilityName,
-			currentFrame
-		);
-
-		// Request the next frame
+		// Always request the next animation frame, regardless of the ability state
 		requestAnimationFrame(animate);
 	}
 
@@ -121,6 +121,7 @@
 	onMount(() => {
 		console.log('Component mounted');
 		initialize();
+		window.addEventListener('keydown', handleKeydown);
 	});
 
 	onDestroy(() => {
@@ -133,7 +134,28 @@
 			gl.deleteBuffer(buffers.positionBuffer);
 			gl.deleteBuffer(buffers.textureCoordBuffer);
 		}
+		window.removeEventListener('keydown', handleKeydown);
 	});
+
+	// Mapping of keys to ability indices
+	const keyToAbilityIndex = {
+		Q: 0,
+		W: 1,
+		E: 2,
+		R: 3,
+		D: 4,
+		F: 5,
+	};
+
+	function handleKeydown(event: KeyboardEvent) {
+		const key = event.key.toUpperCase();
+		if (keyToAbilityIndex[key] !== undefined) {
+			currentAbilityIndex = keyToAbilityIndex[key];
+			console.log({ currentAbilityIndex });
+			currentFrame = 0; // Reset the frame for the new ability
+			isAbilityActive = true; // Set the ability as active
+		}
+	}
 </script>
 
 <canvas bind:this={canvas}></canvas>
