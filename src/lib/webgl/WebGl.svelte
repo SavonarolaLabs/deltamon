@@ -1,121 +1,74 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { initWebGL } from '$lib/webgl/initWebGL';
-	import { game } from '$lib/pvp/game';
 	import { drawScene } from './draw';
-	import { loadBackgroundTexture, loadCreatureTexture, loadAbilityTextures } from './textures';
-	import { abilityFolders } from './abilityFolders';
+	import { loadAllTextures } from './textures';
+	import { game } from '$lib/pvp/game';
 
 	let canvas: HTMLCanvasElement;
 	let gl: WebGLRenderingContext | null;
 	let shaderProgram: WebGLProgram | null;
 	let buffers: any;
-	let backgroundTexture: WebGLTexture | null = null;
-	let creatureTextures: { [key: string]: WebGLTexture } = {};
-	let abilityTextures: { [key: string]: WebGLTexture[] } = {};
-
+	let textures: { [key: string]: WebGLTexture } = {};
 	let currentFrame = 0;
 	const animationSpeed = 12;
 	let lastTime = 0;
-	let isAbilityActive = true; // Always active for demo
-	let spellPositionStart = -0.65; // Start position on the left
-	let spellPositionEnd = 0.4; // Start position on the left
-	let spellPositionX = spellPositionStart; // Start position on the left
-	let spellPositionY = 0.7; // Start podsition on the left
-	const spellSpeed = 0.03; // Movement speed of the spell
+	let isAbilityActive = true;
+	let spellPositionStart = -0.65;
+	let spellPositionEnd = 0.4;
+	let spellPositionX = spellPositionStart;
+	let spellPositionY = 0.7;
+	const spellSpeed = 0.03;
 
-	// Clear and load textures
+	// Clear textures
 	function clearTextures() {
 		if (gl) {
-			if (backgroundTexture) gl.deleteTexture(backgroundTexture);
-			Object.values(creatureTextures).forEach(texture => gl.deleteTexture(texture));
-			Object.values(abilityTextures).forEach(textureArray => {
-				textureArray.forEach(texture => gl.deleteTexture(texture));
-			});
+			Object.values(textures).forEach(texture => gl.deleteTexture(texture));
 		}
-
-		backgroundTexture = null;
-		creatureTextures = {};
-		abilityTextures = {};
+		textures = {};
 	}
 
-	async function loadTextures() {
-		if (!gl) return;
-
-		clearTextures();
-		backgroundTexture = await loadBackgroundTexture(gl, 'current.png');
-
-		const creatureTexturePromises = game.slots
-			.filter(slot => slot.creature)
-			.map(async slot => {
-				creatureTextures[slot.creature!.img] = await loadCreatureTexture(
-					gl,
-					`${slot.creature!.img}`
-				);
-			});
-
-		const abilityTexturePromises = abilityFolders.map(async folder => {
-			abilityTextures[folder.name] = await loadAbilityTextures(gl, folder);
-		});
-
-		await Promise.all([...creatureTexturePromises, ...abilityTexturePromises]);
-	}
-
-	// Animate spell movement from left to right
+	// Animate spell movement and draw scene
 	function animate(time: number) {
 		const elapsedTime = time - lastTime;
-		//lastTime = time;
-
-		// Move the spell to the right
-		spellPositionX += spellSpeed;
-
-		// Update frames based on time and animation speed
 		if (elapsedTime >= animationSpeed) {
 			currentFrame++;
 			lastTime = time;
 		}
 
-		// Loop the frame if it reaches the end
-		if (currentFrame >= abilityTextures['flame10'].length) {
-			currentFrame = 0;
-			isAbilityActive = false;
-		}
-
-		if (spellPositionX > spellPositionEnd) {
-			spellPositionX = spellPositionEnd; // Reset to start on the left once it leaves the screen
+		if (spellPositionX < spellPositionEnd) {
+			spellPositionX += spellSpeed;
 		}
 
 		drawScene(
 			game,
 			gl,
 			shaderProgram,
-			creatureTextures,
-			backgroundTexture,
-			abilityTextures,
-			'flame10', // Spell name from abilityFolders
+			textures,
+			'flame10',
 			currentFrame,
-			spellPositionX, // Pass the X position of the spell
-			spellPositionY, // Y position remains static for now
+			spellPositionX,
+			spellPositionY,
 			isAbilityActive
 		);
 
-		// Request the next animation frame
+		// Request the next frame
 		requestAnimationFrame(animate);
 	}
 
-	// Initialize WebGL
+	// Initialize WebGL and load textures
 	async function initialize() {
-		const result = initWebGL(canvas, game);
+		const result = initWebGL(canvas);
 		if (result) {
 			({ gl, shaderProgram, buffers } = result);
-			await loadTextures();
+			textures = await loadAllTextures(gl);
 			requestAnimationFrame(animate);
 		}
 	}
 
+	// Event listener for animations
 	function handleKeydown(event: KeyboardEvent) {
-		const key = event.key.toUpperCase();
-		if (key === 'Q') {
+		if (event.key.toUpperCase() === 'Q') {
 			currentFrame = 0;
 			spellPositionX = spellPositionStart;
 			isAbilityActive = true;

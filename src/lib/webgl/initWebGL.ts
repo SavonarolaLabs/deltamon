@@ -7,13 +7,9 @@ interface WebGLInitResult {
 	buffers: any;
 }
 
-export function initWebGL(
-	canvas: HTMLCanvasElement,
-	gameState: any,
-	alpha: boolean = false
-): WebGLInitResult | null {
+export function initWebGL(canvas: HTMLCanvasElement): WebGLInitResult | null {
 	// Get WebGL context
-	const gl = canvas.getContext('webgl', { alpha });
+	const gl = canvas.getContext('webgl', { alpha: true });
 
 	if (!gl) {
 		console.error('Unable to initialize WebGL. Your browser may not support it.');

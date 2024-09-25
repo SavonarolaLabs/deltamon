@@ -4,9 +4,9 @@ import { drawBackground } from './drawBackground';
 
 const GY = 0.15;
 // prettier-ignore
-const X1 = 0.8, X2 = X1-0.3;
+const X1 = 0.8, X2 = X1 - 0.3;
 // prettier-ignore
-const Y1 = 0.6, Y2 = Y1 - 0.45, Y3 = Y1-0.45*2;
+const Y1 = 0.6, Y2 = Y1 - 0.45, Y3 = Y1 - 0.45 * 2;
 // prettier-ignore
 const slotPositions = [
     [-X1, Y1],      [-X2, Y1],      [X2, Y1],      [X1, Y1],
@@ -27,9 +27,7 @@ export function drawScene(
 	game: GameState,
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
-	creatureTextures: { [key: string]: WebGLTexture },
-	backgroundTexture: WebGLTexture,
-	abilityTextures: { [key: string]: WebGLTexture[] },
+	textures: { [key: string]: WebGLTexture }, // Updated to use the unified texture array
 	currentAbilityName: string,
 	currentFrame: number,
 	spellPosX: number,
@@ -40,8 +38,11 @@ export function drawScene(
 
 	const { positionBuffer, textureCoordBuffer } = initBuffers(gl);
 
-	// Draw the background
-	drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundTexture);
+	// Draw the background using the unified textures array
+	const backgroundTexture = textures['/bg/current.png'];
+	if (backgroundTexture) {
+		drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundTexture);
+	}
 
 	// Set up shared attributes
 	const positionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
@@ -55,7 +56,8 @@ export function drawScene(
 	// Draw creatures in slots
 	game.slots.forEach((slot, index) => {
 		if (slot.creature) {
-			const texture = creatureTextures[slot.creature.img];
+			const textureKey = `/monster/${slot.creature.img}`;
+			const texture = textures[textureKey];
 			if (texture) {
 				const [x, y] = getSlotPosition(index);
 				drawElement(
@@ -76,21 +78,23 @@ export function drawScene(
 		}
 	});
 
-	// Draw the ability (fireball) moving across the screen
-	if (drawSpell && abilityTextures[currentAbilityName]?.length > 0) {
-		const frame = abilityTextures[currentAbilityName][currentFrame];
-		drawElement(
-			gl,
-			shaderProgram,
-			positionBuffer,
-			textureCoordBuffer,
-			frame,
-			spellPosX,
-			spellPosY,
-			0.5,
-			positionAttribute,
-			textureCoordAttribute
-		);
+	// Draw the ability (spell) moving across the screen
+	if (drawSpell && textures[`${currentAbilityName}`]) {
+		const frameTexture = textures[`${currentAbilityName}_${currentFrame}`];
+		if (frameTexture) {
+			drawElement(
+				gl,
+				shaderProgram,
+				positionBuffer,
+				textureCoordBuffer,
+				frameTexture,
+				spellPosX,
+				spellPosY,
+				0.5,
+				positionAttribute,
+				textureCoordAttribute
+			);
+		}
 	}
 }
 
@@ -138,7 +142,7 @@ function setPositionBuffer(
 	positionAttribute: number
 ) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	//prettier-ignore
+	// prettier-ignore
 	const positions = new Float32Array([
         -scaleX + x, scaleY + y,
         -scaleX + x, -scaleY + y,
