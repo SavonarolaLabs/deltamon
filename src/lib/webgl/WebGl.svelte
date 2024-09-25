@@ -15,13 +15,13 @@
 	let abilityTextures: { [key: string]: WebGLTexture[] } = {};
 
 	let currentFrame = 0;
-	const animationSpeed = 30;
+	const animationSpeed = 12;
 	let lastTime = 0;
 	let isAbilityActive = true; // Always active for demo
-	let spellPositionStart = -0.4; // Start position on the left
-	let spellPositionEnd = 0.3; // Start position on the left
+	let spellPositionStart = -0.65; // Start position on the left
+	let spellPositionEnd = 0.4; // Start position on the left
 	let spellPositionX = spellPositionStart; // Start position on the left
-	let spellPositionY = 0.05; // Start position on the left
+	let spellPositionY = 0.7; // Start podsition on the left
 	const spellSpeed = 0.03; // Movement speed of the spell
 
 	// Clear and load textures
@@ -64,7 +64,7 @@
 	// Animate spell movement from left to right
 	function animate(time: number) {
 		const elapsedTime = time - lastTime;
-		lastTime = time;
+		//lastTime = time;
 
 		// Move the spell to the right
 		spellPositionX += spellSpeed;
@@ -79,7 +79,6 @@
 		if (currentFrame >= abilityTextures['flame10'].length) {
 			currentFrame = 0;
 			isAbilityActive = false;
-			spellPositionX = spellPositionStart;
 		}
 
 		if (spellPositionX > spellPositionEnd) {
@@ -117,10 +116,6 @@
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toUpperCase();
 		if (key === 'Q') {
-			currentFrame = 0;
-			spellPositionX = spellPositionStart;
-			isAbilityActive = true;
-		} else if (key === 'W') {
 			currentFrame = 0;
 			spellPositionX = spellPositionStart;
 			isAbilityActive = true;

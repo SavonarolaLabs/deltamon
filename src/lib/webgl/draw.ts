@@ -76,10 +76,10 @@ export function drawScene(
 	});
 
 	// Draw the ability (fireball) moving across the screen
-	if (!drawSpell) return;
+	if (drawSpell == false) return;
 	const currentAbilityFrames = abilityTextures[currentAbilityName];
 	if (currentAbilityFrames && currentAbilityFrames.length > 0) {
-		const frame = currentAbilityFrames[currentFrame % currentAbilityFrames.length];
+		const frame = currentAbilityFrames[currentFrame];
 		drawAbility(
 			gl,
 			shaderProgram,
@@ -88,7 +88,7 @@ export function drawScene(
 			frame,
 			spellPosX, // X position for spell
 			spellPosY, // Y position for spell
-			0.3, // Scale of the spell
+			0.5, // Scale of the spell
 			positionAttribute,
 			textureCoordAttribute
 		);
