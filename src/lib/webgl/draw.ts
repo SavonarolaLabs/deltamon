@@ -28,8 +28,7 @@ export function drawScene(
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
 	textures: { [key: string]: WebGLTexture }, // Updated to use the unified texture array
-	currentAbilityName: string,
-	currentFrame: number,
+	currentFrame: string,
 	spellPosX: number,
 	spellPosY: number,
 	drawSpell: boolean
@@ -54,6 +53,7 @@ export function drawScene(
 	gl.uniform1i(samplerUniform, 0);
 
 	// Draw creatures in slots
+
 	game.slots.forEach((slot, index) => {
 		if (slot.creature) {
 			const textureKey = `/monster/${slot.creature.img}`;
@@ -79,8 +79,8 @@ export function drawScene(
 	});
 
 	// Draw the ability (spell) moving across the screen
-	if (drawSpell && textures[`${currentAbilityName}`]) {
-		const frameTexture = textures[`${currentAbilityName}_${currentFrame}`];
+	if (drawSpell) {
+		const frameTexture = textures[currentFrame];
 		if (frameTexture) {
 			drawElement(
 				gl,

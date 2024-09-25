@@ -45,8 +45,7 @@
 			gl,
 			shaderProgram,
 			textures,
-			'flame10',
-			currentFrame,
+			`/abilities/flame10/${currentFrame.toString().padStart(4, '0')}.png`,
 			spellPositionX,
 			spellPositionY,
 			isAbilityActive
