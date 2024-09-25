@@ -8,40 +8,44 @@ export function drawBackground(
 	const canvasWidth = gl.canvas.width;
 	const canvasHeight = gl.canvas.height;
 
-	// Aspect ratio of the background image (for example, 1792 / 1024)
-	const imageAspectRatio = 1792 / 1024;
-	const canvasAspectRatio = canvasWidth / canvasHeight;
+	// Размеры изображения (например, 1792 x 1024)
+	const imageWidth = 1792;
+	const imageHeight = 1024;
+
+	// Расчет соотношений
+	const widthRatio = imageWidth / canvasWidth;
+	const heightRatio = imageHeight / canvasHeight;
 
 	let width, height;
 
-	// Cover the full canvas while keeping the aspect ratio, allowing part of the image to be cut off
-	if (canvasAspectRatio > imageAspectRatio) {
-		// Canvas is wider relative to the image, fit by width and adjust height
-		width = 2.0; // Full width (2.0 in normalized device coordinates)
-		height = (width / canvasAspectRatio) * imageAspectRatio; // Adjust height based on aspect ratio
+	// Берем наименьшее из соотношений для масштабирования
+	if (widthRatio < heightRatio) {
+		// Высота картинки доминирует
+		width = 2.0; // Масштабируем по ширине
+		height = (heightRatio / widthRatio) * 2.0; // Масштабируем по меньшей стороне, обрезая по высоте
 	} else {
-		// Canvas is taller relative to the image, fit by height and adjust width
-		height = 2.0; // Full height (2.0 in normalized device coordinates)
-		width = (height * canvasAspectRatio) / imageAspectRatio; // Adjust width based on aspect ratio
+		// Ширина картинки доминирует
+		height = 2.0; // Масштабируем по высоте
+		width = (widthRatio / heightRatio) * 2.0; // Масштабируем по меньшей стороне, обрезая по ширине
 	}
 
-	// Set the vertex positions for the background quad (centered, maintaining aspect ratio)
+	// Устанавливаем вершинные позиции для заднего фона (сохранение пропорций)
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 	// prettier-ignore
 	const modifiedPositions = new Float32Array([
-		-width / 2,  height / 2,   // Top-left
-		-width / 2, -height / 2,   // Bottom-left
-		 width / 2,  height / 2,   // Top-right
-		 width / 2, -height / 2    // Bottom-right
+		-width / 2,  height / 2,   // Верхний левый угол
+		-width / 2, -height / 2,   // Нижний левый угол
+		 width / 2,  height / 2,   // Верхний правый угол
+		 width / 2, -height / 2    // Нижний правый угол
 	]);
 	gl.bufferData(gl.ARRAY_BUFFER, modifiedPositions, gl.STATIC_DRAW);
 
-	// Bind position attribute and texture coordinates
+	// Привязка атрибута позиции и текстурных координат
 	const positionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
 	gl.enableVertexAttribArray(positionAttribute);
 	gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
 
-	// Bind the background texture
+	// Привязка текстуры фона
 	if (backgroundTexture) {
 		gl.bindTexture(gl.TEXTURE_2D, backgroundTexture);
 	}
@@ -54,6 +58,6 @@ export function drawBackground(
 	const samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler');
 	gl.uniform1i(samplerUniform, 0);
 
-	// Draw the background quad
+	// Отрисовка заднего фона
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
