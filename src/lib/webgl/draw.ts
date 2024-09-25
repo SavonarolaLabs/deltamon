@@ -58,7 +58,7 @@ export function drawScene(
 			const texture = creatureTextures[slot.creature.img];
 			if (texture) {
 				const [x, y] = getSlotPosition(index);
-				drawSlot(
+				drawElement(
 					gl,
 					shaderProgram,
 					positionBuffer,
@@ -66,6 +66,7 @@ export function drawScene(
 					texture,
 					x,
 					y,
+					0.19,
 					positionAttribute,
 					textureCoordAttribute
 				);
@@ -76,26 +77,24 @@ export function drawScene(
 	});
 
 	// Draw the ability (fireball) moving across the screen
-	if (drawSpell == false) return;
-	const currentAbilityFrames = abilityTextures[currentAbilityName];
-	if (currentAbilityFrames && currentAbilityFrames.length > 0) {
-		const frame = currentAbilityFrames[currentFrame];
-		drawAbility(
+	if (drawSpell && abilityTextures[currentAbilityName]?.length > 0) {
+		const frame = abilityTextures[currentAbilityName][currentFrame];
+		drawElement(
 			gl,
 			shaderProgram,
 			positionBuffer,
 			textureCoordBuffer,
 			frame,
-			spellPosX, // X position for spell
-			spellPosY, // Y position for spell
-			0.5, // Scale of the spell
+			spellPosX,
+			spellPosY,
+			0.5,
 			positionAttribute,
 			textureCoordAttribute
 		);
 	}
 }
 
-function drawAbility(
+function drawElement(
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
 	positionBuffer: WebGLBuffer,
@@ -108,23 +107,6 @@ function drawAbility(
 	textureCoordAttribute: number
 ) {
 	const { scaleX, scaleY } = calculateScaling(gl, scale, 1);
-	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
-	bindTextureAndCoords(gl, texture, textureCoordBuffer, textureCoordAttribute);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-}
-
-function drawSlot(
-	gl: WebGLRenderingContext,
-	shaderProgram: WebGLProgram,
-	positionBuffer: WebGLBuffer,
-	textureCoordBuffer: WebGLBuffer,
-	texture: WebGLTexture,
-	x: number,
-	y: number,
-	positionAttribute: number,
-	textureCoordAttribute: number
-) {
-	const { scaleX, scaleY } = calculateScaling(gl, 0.19, 1);
 	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
 	bindTextureAndCoords(gl, texture, textureCoordBuffer, textureCoordAttribute);
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -175,25 +157,5 @@ function bindTextureAndCoords(
 ) {
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
-}
-
-function bindTextureAndCoordsFlipped(
-	gl: WebGLRenderingContext,
-	texture: WebGLTexture,
-	textureCoordBuffer: WebGLBuffer,
-	textureCoordAttribute: number
-) {
-	gl.bindTexture(gl.TEXTURE_2D, texture);
-	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-
-	//prettier-ignore
-	const flippedTexCoords = new Float32Array([
-		1.0, 0.0, // Top-right
-		1.0, 1.0, // Bottom-right
-		0.0, 0.0, // Top-left
-		0.0, 1.0  // Bottom-left
-	]);
-	gl.bufferData(gl.ARRAY_BUFFER, flippedTexCoords, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
 }
