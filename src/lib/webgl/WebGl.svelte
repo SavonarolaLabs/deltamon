@@ -4,21 +4,49 @@
 	import { drawScene } from './draw';
 	import { loadAllTextures } from './textures';
 	import { game } from '$lib/pvp/game';
+	import { abilityFolders } from './abilityFolders';
+	import type { DrawSpell } from '$lib/types';
 
 	let canvas: HTMLCanvasElement;
 	let gl: WebGLRenderingContext | null;
 	let shaderProgram: WebGLProgram | null;
 	let buffers: any;
 	let textures: { [key: string]: WebGLTexture } = {};
-	let currentFrame = 0;
-	const animationSpeed = 12;
-	let lastTime = 0;
-	let isAbilityActive = true;
-	let spellPositionStart = -0.65;
-	let spellPositionEnd = 0.4;
-	let spellPositionX = spellPositionStart;
-	let spellPositionY = 0.7;
-	const spellSpeed = 0.03;
+
+	let drawSpells: DrawSpell[] = [
+		{
+			currentFrame: 0,
+			spellSpeed: 0.03,
+			animationSpeed: 12,
+			lastTime: 0,
+			startX: -0.65,
+			startY: 0.7,
+			endX: 0.4,
+
+			abilityFolder: abilityFolders.find(a => a.name == 'flame10')!,
+			texturePath: `/abilities/flame10/0000.png`,
+			x: -0.65,
+			y: 0.7,
+			scale: 1,
+			draw: true,
+		},
+		{
+			currentFrame: 0,
+			spellSpeed: 0.02,
+			animationSpeed: 10,
+			lastTime: 0,
+			startX: -0.8,
+			startY: 0.1,
+			endX: 0.4,
+
+			abilityFolder: abilityFolders.find(a => a.name == 'flame10')!,
+			texturePath: `/abilities/flame10/0000.png`,
+			x: -0.8,
+			y: 0.1,
+			scale: 0.5,
+			draw: true,
+		},
+	];
 
 	// Clear textures
 	function clearTextures() {
@@ -30,28 +58,26 @@
 
 	// Animate spell movement and draw scene
 	function animate(time: number) {
-		const elapsedTime = time - lastTime;
-		if (elapsedTime >= animationSpeed) {
-			currentFrame++;
-			lastTime = time;
+		for (const spell of drawSpells) {
+			const elapsedTime = time - spell.lastTime;
+			if (elapsedTime >= spell.animationSpeed) {
+				spell.currentFrame++;
+				spell.lastTime = time;
+			}
+
+			if (spell.x < spell.endX) {
+				spell.x += spell.spellSpeed;
+			}
+
+			if (spell.currentFrame >= spell.abilityFolder.frameCount) {
+				spell.draw = false;
+			}
+
+			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
 		}
 
-		if (spellPositionX < spellPositionEnd) {
-			spellPositionX += spellSpeed;
-		}
+		drawScene(game, gl, shaderProgram, textures, drawSpells);
 
-		drawScene(
-			game,
-			gl,
-			shaderProgram,
-			textures,
-			`/abilities/flame10/${currentFrame.toString().padStart(4, '0')}.png`,
-			spellPositionX,
-			spellPositionY,
-			isAbilityActive
-		);
-
-		// Request the next frame
 		requestAnimationFrame(animate);
 	}
 
@@ -68,9 +94,12 @@
 	// Event listener for animations
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key.toUpperCase() === 'Q') {
-			currentFrame = 0;
-			spellPositionX = spellPositionStart;
-			isAbilityActive = true;
+			for (const spell of drawSpells) {
+				spell.currentFrame = 0;
+				spell.x = spell.startX;
+				spell.draw = true;
+				spell.lastTime = 0;
+			}
 		}
 	}
 

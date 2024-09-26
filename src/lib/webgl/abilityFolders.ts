@@ -1,4 +1,6 @@
-export const abilityFolders = [
+import type { AbilityFolder } from '$lib/types';
+
+export const abilityFolders: AbilityFolder[] = [
 	{ name: 'flame10', path: '/abilities/flame10', frameCount: 41 },
 	{ name: 'flame2', path: '/abilities/flame2', frameCount: 16 },
 	//{ name: 'flame5', path: '/abilities/flame5', frameCount: 84 },

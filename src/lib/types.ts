@@ -75,3 +75,29 @@ export type Damage = {
 export type DamageInstance = {
 	parts: Damage[];
 };
+
+// rendering
+export type AbilityFolder = {
+	name: string;
+	path: string;
+	frameCount: number;
+};
+
+export type DrawSpell = {
+	// animation
+	currentFrame: number;
+	spellSpeed: number;
+	animationSpeed: number;
+	lastTime: number;
+	startX: number;
+	startY: number;
+	endX: number;
+
+	// rendering
+	abilityFolder: AbilityFolder;
+	texturePath: string;
+	x: number;
+	y: number;
+	scale: number;
+	draw: boolean;
+};

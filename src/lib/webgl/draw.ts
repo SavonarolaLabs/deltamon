@@ -1,4 +1,4 @@
-import type { GameState } from '$lib/types';
+import type { DrawSpell, GameState } from '$lib/types';
 import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
@@ -27,11 +27,8 @@ export function drawScene(
 	game: GameState,
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
-	textures: { [key: string]: WebGLTexture }, // Updated to use the unified texture array
-	currentFrame: string,
-	spellPosX: number,
-	spellPosY: number,
-	drawSpell: boolean
+	textures: { [key: string]: WebGLTexture },
+	drawSpells: DrawSpell[]
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -53,7 +50,6 @@ export function drawScene(
 	gl.uniform1i(samplerUniform, 0);
 
 	// Draw creatures in slots
-
 	game.slots.forEach((slot, index) => {
 		if (slot.creature) {
 			const textureKey = `/monster/${slot.creature.img}`;
@@ -73,27 +69,31 @@ export function drawScene(
 					textureCoordAttribute
 				);
 			} else {
-				console.error(`Texture not found for creature img: ${slot.creature.img}`);
+				console.error(`! Texture not found for creature img: ${slot.creature.img}`);
 			}
 		}
 	});
 
-	// Draw the ability (spell) moving across the screen
-	if (drawSpell) {
-		const frameTexture = textures[currentFrame];
-		if (frameTexture) {
-			drawElement(
-				gl,
-				shaderProgram,
-				positionBuffer,
-				textureCoordBuffer,
-				frameTexture,
-				spellPosX,
-				spellPosY,
-				0.5,
-				positionAttribute,
-				textureCoordAttribute
-			);
+	// Draw the ability (spells) moving across the screen
+	for (let spell of drawSpells) {
+		if (spell.draw) {
+			const frameTexture = textures[spell.texturePath];
+			if (frameTexture) {
+				drawElement(
+					gl,
+					shaderProgram,
+					positionBuffer,
+					textureCoordBuffer,
+					frameTexture,
+					spell.x,
+					spell.y,
+					spell.scale,
+					positionAttribute,
+					textureCoordAttribute
+				);
+			} else {
+				console.warn(`${spell.texturePath} not in textures[].`);
+			}
 		}
 	}
 }
