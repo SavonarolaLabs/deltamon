@@ -3,8 +3,8 @@ import type { SlotRenderData } from '$lib/types';
 let hoverStartTime: number | null = null;
 
 export function applyHoverAnimation(slot: SlotRenderData, time: number): SlotRenderData {
-	const hoverAmplitude = 0.001; // Adjust for how far the slot moves up and down
-	const hoverSpeed = 0.004; // Adjust for how fast the slot moves
+	const hoverAmplitude = 0.0006; // Adjust for how far the slot moves up and down
+	const hoverSpeed = 0.003; // Adjust for how fast the slot moves
 
 	if (!hoverStartTime) hoverStartTime = time;
 
@@ -15,6 +15,6 @@ export function applyHoverAnimation(slot: SlotRenderData, time: number): SlotRen
 	return {
 		...slot,
 		scale: 0.24,
-		y: slot.y + hoverOffset, // Apply vertical oscillation to the `y` position
+		y: slot.y - hoverOffset / 2, // Apply vertical oscillation to the `y` position
 	};
 }

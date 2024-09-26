@@ -30,6 +30,7 @@
 
 			// Initialize slot rendering data
 			slotRenderData = initializeSlotRenderData(game);
+			slotRenderData[1].zIndex = 10;
 
 			requestAnimationFrame(animate);
 		}

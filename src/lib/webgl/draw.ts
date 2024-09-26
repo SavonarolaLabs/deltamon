@@ -36,8 +36,11 @@ export function drawScene(
 		drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundTexture);
 	}
 
-	// Draw creatures in slots based on slotRenderData
-	slotRenderData.forEach(slot => {
+	// Sort slots by zIndex before rendering
+	const sortedSlots = slotRenderData.slice().sort((a, b) => a.zIndex - b.zIndex);
+
+	// Draw creatures in sorted order
+	sortedSlots.forEach(slot => {
 		const texture = textures[slot.texturePath];
 		if (texture) {
 			drawElement(
@@ -57,7 +60,7 @@ export function drawScene(
 		}
 	});
 
-	// Draw spells
+	// Draw spells (they will also respect z-order if needed)
 	for (let spell of drawSpells.sort((a, b) => a.z - b.z)) {
 		if (spell.draw) {
 			const frameTexture = textures[spell.texturePath];
