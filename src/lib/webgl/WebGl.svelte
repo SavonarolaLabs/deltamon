@@ -21,9 +21,15 @@
 	let slotRenderData: SlotRenderData[] = [];
 
 	const targetSlotIndex = 6; // Target index for the impact animation
+	const activeSlotIndex = 1; // Active slot index for movement
 	let impactStartTime: number | null = null;
 	const impactDuration = 300; // Duration for the impact effect in ms
 	const kickOffset = 0.02; // Kick distance
+
+	// Active slot movement parameters
+	let activeSlotMoveStartTime: number | null = null;
+	const activeSlotMoveDuration = 200; // Duration for the active slot move in ms
+	const activeSlotMoveOffset = -0.01; // Distance to move left
 
 	// Initialize WebGL and textures
 	async function initialize() {
@@ -35,7 +41,7 @@
 
 			// Initialize slot rendering data
 			slotRenderData = initializeSlotRenderData(game);
-			slotRenderData[1].zIndex = 10;
+			slotRenderData[activeSlotIndex].zIndex = 10;
 
 			requestAnimationFrame(animate);
 		}
@@ -54,6 +60,9 @@
 		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
 		const flame10 = createFlame10();
 		drawSpells.push(flame10);
+
+		// Start movement for the active slot
+		activeSlotMoveStartTime = performance.now();
 
 		playAudioAfterDelay('/mp3/Beating Punch.mp3', 350);
 		setTimeout(() => {
@@ -90,15 +99,33 @@
 		// Apply hover effect to active creature
 		const activeCreature = game.activeCreature;
 		if (activeCreature) {
-			const activeSlotIndex = game.slots.findIndex(
+			const activeCreatureSlotIndex = game.slots.findIndex(
 				slot => slot.creature?.bcId === activeCreature.bcId
 			);
-			if (activeSlotIndex !== -1) {
+			if (activeCreatureSlotIndex !== -1) {
 				// Apply hover animation to the active slot
-				slotRenderData[activeSlotIndex] = applyHoverAnimation(
-					slotRenderData[activeSlotIndex],
+				slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(
+					slotRenderData[activeCreatureSlotIndex],
 					time
 				);
+			}
+		}
+
+		// Apply active slot movement effect if started
+		if (activeSlotMoveStartTime) {
+			const elapsedMoveTime = time - activeSlotMoveStartTime;
+			const moveProgress = Math.min(elapsedMoveTime / activeSlotMoveDuration, 1);
+			const easedMoveProgress = Math.sin(moveProgress * Math.PI); // Ease in/out effect
+
+			// Move the active slot to the left slightly and back
+			slotRenderData[activeSlotIndex].x =
+				slotRenderData[activeSlotIndex].originalX +
+				activeSlotMoveOffset * easedMoveProgress;
+
+			// Reset movement after completion
+			if (moveProgress >= 1) {
+				slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX;
+				activeSlotMoveStartTime = null;
 			}
 		}
 
@@ -117,7 +144,6 @@
 
 			// Reset impact animation after completion
 			if (impactProgress >= 1) {
-				// Ensure the slot returns precisely to its original position
 				slotRenderData[targetSlotIndex].x = slotRenderData[targetSlotIndex].originalX;
 				slotRenderData[targetSlotIndex].whiteFlash = 0; // Remove flash effect
 				impactStartTime = null;
