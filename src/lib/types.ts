@@ -115,4 +115,5 @@ export type SlotRenderData = {
 	scale: number;
 	zIndex: number;
 	isHovered: boolean;
+	whiteFlash?: number; // Percentage of white overlay (0-1)
 };

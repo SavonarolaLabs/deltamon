@@ -53,7 +53,8 @@ export function drawScene(
 				slot.y,
 				slot.scale,
 				positionAttribute,
-				textureCoordAttribute
+				textureCoordAttribute,
+				slot.whiteFlash // Pass white flash value
 			);
 		} else {
 			console.warn(`Texture not found for path: ${slot.texturePath}`);
@@ -94,11 +95,17 @@ function drawElement(
 	y: number,
 	scale: number,
 	positionAttribute: number,
-	textureCoordAttribute: number
+	textureCoordAttribute: number,
+	whiteFlash: number = 0 // Default no flash
 ) {
 	const { scaleX, scaleY } = calculateScaling(gl, scale, 1);
 	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
 	bindTextureAndCoords(gl, texture, textureCoordBuffer, textureCoordAttribute);
+
+	// Apply white flash as a uniform
+	const whiteFlashUniform = gl.getUniformLocation(shaderProgram, 'uWhiteFlash');
+	gl.uniform1f(whiteFlashUniform, whiteFlash);
+
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 

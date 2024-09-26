@@ -102,19 +102,24 @@
 			}
 		}
 
+		// Apply impact animation to target slot if impact has started
 		if (impactStartTime) {
 			const elapsedImpactTime = time - impactStartTime;
 			const impactProgress = Math.min(elapsedImpactTime / impactDuration, 1);
 			const easedImpactProgress = Math.sin(impactProgress * Math.PI); // Ease in/out effect
 
-			// Calculate the new x position based on kick offset
+			// Calculate the new x position with kick offset based on `originalX`
 			slotRenderData[targetSlotIndex].x =
 				slotRenderData[targetSlotIndex].originalX + kickOffset * easedImpactProgress;
+
+			// Apply white flash effect based on impact progress
+			slotRenderData[targetSlotIndex].whiteFlash = 0.9 * (1 - impactProgress); // 90% white at the start, fades to 0%
 
 			// Reset impact animation after completion
 			if (impactProgress >= 1) {
 				// Ensure the slot returns precisely to its original position
 				slotRenderData[targetSlotIndex].x = slotRenderData[targetSlotIndex].originalX;
+				slotRenderData[targetSlotIndex].whiteFlash = 0; // Remove flash effect
 				impactStartTime = null;
 			}
 		}
