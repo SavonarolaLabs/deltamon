@@ -102,3 +102,15 @@ export type DrawSpell = {
 	scale: number;
 	draw: boolean;
 };
+
+// Slot rendering data
+export type SlotRenderData = {
+	slotIndex: number;
+	playerId: number;
+	texturePath: string;
+	x: number;
+	y: number;
+	scale: number;
+	zIndex: number;
+	isHovered: boolean;
+};

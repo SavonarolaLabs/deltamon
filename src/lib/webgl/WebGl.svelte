@@ -6,27 +6,34 @@
 	import { game } from '$lib/pvp/game';
 	import { playAudio, playAudioAfterDelay } from './audio';
 	import { createFlame10, createFlame2 } from './spells';
-	import type { DrawSpell } from '$lib/types';
+	import { initializeSlotRenderData } from './slotRenderData';
+	import type { DrawSpell, SlotRenderData } from '$lib/types';
 
 	let canvas: HTMLCanvasElement;
 	let gl: WebGLRenderingContext | null;
 	let shaderProgram: WebGLProgram | null;
 	let buffers: any;
 	let textures: { [key: string]: WebGLTexture } = {};
-	let drawSpells: DrawSpell[] = [];
 
-	// Initializes WebGL and textures
+	let drawSpells: DrawSpell[] = [];
+	let slotRenderData: SlotRenderData[] = [];
+
+	// Initialize WebGL and textures
 	async function initialize() {
 		const result = initWebGL(canvas);
 		if (result) {
 			({ gl, shaderProgram, buffers } = result);
 			textures = await loadAllTextures(gl);
 			initDrawScene(gl, shaderProgram);
+
+			// Initialize slot rendering data
+			slotRenderData = initializeSlotRenderData(game);
+
 			requestAnimationFrame(animate);
 		}
 	}
 
-	// Clears all textures
+	// Clear all textures
 	function clearTextures() {
 		if (gl) {
 			Object.values(textures).forEach(texture => gl.deleteTexture(texture));
@@ -34,7 +41,7 @@
 		textures = {};
 	}
 
-	// Adds a new fireball spell to the scene
+	// Add new fireball spell
 	function castFireball() {
 		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
 		const flame10 = createFlame10();
@@ -47,7 +54,7 @@
 		}, 500);
 	}
 
-	// Updates animation frame based on time
+	// Animate spells and slots
 	function animate(time: number) {
 		drawSpells.forEach(spell => {
 			if (!spell.startTime) spell.startTime = time;
@@ -55,26 +62,22 @@
 			const elapsedTime = time - spell.startTime;
 			const progress = Math.min(elapsedTime / spell.duration, 1);
 
-			// Split movement into two phases: static (first 30%) and moving (remaining 70%)
-			if (spell.abilityFolder.name === 'flame10') {
-				if (progress > 0.3) {
-					const moveProgress = (progress - 0.3) / 0.7; // Normalize movement phase progress
-					spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
-				}
-				spell.y = spell.startY; // No vertical movement in this example
-			}
-
-			// Calculate frame based on full progress
 			spell.currentFrame = Math.floor(progress * (spell.abilityFolder.frameCount - 1));
 			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
 
-			// Mark spell as done if progress reaches 1
+			if (spell.abilityFolder.name === 'flame10') {
+				if (progress > 0.3) {
+					const moveProgress = (progress - 0.3) / 0.7;
+					spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
+				}
+				spell.y = spell.startY;
+			}
+
 			if (progress >= 1) spell.draw = false;
 		});
 
-		// Filter out completed spells and draw the scene
 		drawSpells = drawSpells.filter(spell => spell.draw);
-		drawScene(game, gl, shaderProgram, textures, drawSpells);
+		drawScene(game, slotRenderData, gl, shaderProgram, textures, drawSpells);
 
 		requestAnimationFrame(animate);
 	}
