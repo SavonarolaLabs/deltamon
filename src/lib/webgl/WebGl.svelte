@@ -65,6 +65,8 @@
 
 	function castFireball() {
 		const audio = new Audio('/mp3/hadouken.mp3');
+		audio.playbackRate = 1.1;
+		audio.currentTime = 0.3;
 		audio.play();
 
 		const flame10 = {
@@ -85,6 +87,12 @@
 		};
 
 		drawSpells.push(flame10);
+
+		setTimeout(() => {
+			//https://soundeffectpro.com/tag/fighting-punch
+			const audio = new Audio('/mp3/Beating Punch.mp3');
+			audio.play();
+		}, 350);
 
 		setTimeout(() => {
 			const flame2 = {
