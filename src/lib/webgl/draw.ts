@@ -3,21 +3,26 @@ import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
 const GY = 0.15;
-// prettier-ignore
-const X1 = 0.8, X2 = X1 - 0.3;
-// prettier-ignore
-const Y1 = 0.6, Y2 = Y1 - 0.45, Y3 = Y1 - 0.45 * 2;
-// prettier-ignore
+const X1 = 0.8,
+	X2 = X1 - 0.3;
+const Y1 = 0.6,
+	Y2 = Y1 - 0.45,
+	Y3 = Y1 - 0.45 * 2;
 const slotPositions = [
-    [-X1, Y1],      [-X2, Y1],      [X2, Y1],      [X1, Y1],
-    [-X1, Y2-GY],   [-X2, Y2-GY],   [X2, Y2-GY],   [X1, Y2-GY],
-    [-X1, Y3-GY*2], [-X2, Y3-GY*2], [X2, Y3-GY*2], [X1, Y3-GY*2]
+	[-X1, Y1],
+	[-X2, Y1],
+	[X2, Y1],
+	[X1, Y1],
+	[-X1, Y2 - GY],
+	[-X2, Y2 - GY],
+	[X2, Y2 - GY],
+	[X1, Y2 - GY],
+	[-X1, Y3 - GY * 2],
+	[-X2, Y3 - GY * 2],
+	[X2, Y3 - GY * 2],
+	[X1, Y3 - GY * 2],
 ];
-// prettier-ignore
-const indexMap = [
-    0, 1, 4, 5, 8, 9,
-    2, 3, 6, 7, 10, 11
-];
+const indexMap = [0, 1, 4, 5, 8, 9, 2, 3, 6, 7, 10, 11];
 
 function getSlotPosition(index: number): [number, number] {
 	return slotPositions[indexMap[index]];
@@ -29,6 +34,9 @@ let positionAttribute: number;
 let textureCoordAttribute: number;
 let samplerUniform: WebGLUniformLocation;
 
+let lastFrameTime: number | null = null;
+let fpsElement: HTMLElement | null = null;
+
 export function initDrawScene(gl: WebGLRenderingContext, shaderProgram: WebGLProgram) {
 	({ positionBuffer, textureCoordBuffer } = initBuffers(gl));
 
@@ -39,6 +47,18 @@ export function initDrawScene(gl: WebGLRenderingContext, shaderProgram: WebGLPro
 	gl.enableVertexAttribArray(positionAttribute);
 	gl.enableVertexAttribArray(textureCoordAttribute);
 	gl.uniform1i(samplerUniform, 0);
+
+	// Create or select the FPS display element
+	if (!fpsElement) {
+		fpsElement = document.createElement('div');
+		fpsElement.style.position = 'absolute';
+		fpsElement.style.top = '10px';
+		fpsElement.style.left = '10px';
+		fpsElement.style.color = 'white';
+		fpsElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+		fpsElement.style.padding = '5px';
+		document.body.appendChild(fpsElement);
+	}
 }
 
 export function drawScene(
@@ -49,6 +69,17 @@ export function drawScene(
 	drawSpells: DrawSpell[]
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	// Calculate and display FPS
+	if (lastFrameTime !== null) {
+		const now = performance.now();
+		const delta = now - lastFrameTime;
+		const fps = Math.round(1000 / delta);
+		if (fpsElement) fpsElement.innerText = `FPS: ${fps}`;
+		lastFrameTime = now;
+	} else {
+		lastFrameTime = performance.now();
+	}
 
 	const backgroundTexture = textures['/bg/current.png'];
 	if (backgroundTexture) {
@@ -146,13 +177,16 @@ function setPositionBuffer(
 	positionAttribute: number
 ) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	// prettier-ignore
 	const positions = new Float32Array([
-        -scaleX + x, scaleY + y,
-        -scaleX + x, -scaleY + y,
-        scaleX + x, scaleY + y,
-        scaleX + x, -scaleY + y,
-    ]);
+		-scaleX + x,
+		scaleY + y,
+		-scaleX + x,
+		-scaleY + y,
+		scaleX + x,
+		scaleY + y,
+		scaleX + x,
+		-scaleY + y,
+	]);
 	gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
 }

@@ -87,6 +87,7 @@ export type DrawSpell = {
 	// animate
 	currentFrame: number;
 	duration: number;
+	startTime: number;
 	lastTime: number;
 	startX: number;
 	startY: number;

@@ -13,10 +13,20 @@
 	let shaderProgram: WebGLProgram | null;
 	let buffers: any;
 	let textures: { [key: string]: WebGLTexture } = {};
-
 	let drawSpells: DrawSpell[] = [];
 
-	// Clear textures
+	// Initializes WebGL and textures
+	async function initialize() {
+		const result = initWebGL(canvas);
+		if (result) {
+			({ gl, shaderProgram, buffers } = result);
+			textures = await loadAllTextures(gl);
+			initDrawScene(gl, shaderProgram);
+			requestAnimationFrame(animate);
+		}
+	}
+
+	// Clears all textures
 	function clearTextures() {
 		if (gl) {
 			Object.values(textures).forEach(texture => gl.deleteTexture(texture));
@@ -24,52 +34,7 @@
 		textures = {};
 	}
 
-	// Animate spell movement and draw scene
-	function animate(time: number) {
-		for (const spell of drawSpells) {
-			const elapsedTime = time - spell.lastTime;
-
-			if (elapsedTime >= spell.duration / spell.abilityFolder.frameCount) {
-				spell.currentFrame++;
-				spell.currentFrame++;
-				spell.lastTime = time;
-			}
-
-			// Interpolate flame10's position based on time
-			if (spell.abilityFolder.name === 'flame10') {
-				if (!spell.startTime) spell.startTime = time; // Set startTime only once
-				const progress = Math.min((time - spell.startTime) / spell.duration, 1); // Clamp between 0 and 1
-				spell.x = spell.startX + (spell.endX - spell.startX) * progress;
-				spell.y = spell.startY; // No vertical movement in this example
-			}
-
-			// Check if spell is completed
-			if (spell.currentFrame >= spell.abilityFolder.frameCount) {
-				spell.draw = false;
-			}
-
-			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
-		}
-
-		// Filter out completed spells
-		drawSpells = drawSpells.filter(spell => spell.draw);
-
-		drawScene(game, gl, shaderProgram, textures, drawSpells);
-
-		requestAnimationFrame(animate);
-	}
-
-	// Initialize WebGL and load textures
-	async function initialize() {
-		const result = initWebGL(canvas);
-		if (result) {
-			({ gl, shaderProgram, buffers } = result);
-			textures = await loadAllTextures(gl);
-			initDrawScene(gl, shaderProgram); // Initialize buffers and attributes
-			requestAnimationFrame(animate);
-		}
-	}
-
+	// Adds a new fireball spell to the scene
 	function castFireball() {
 		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
 		const flame10 = createFlame10();
@@ -82,13 +47,44 @@
 		}, 500);
 	}
 
-	// Event listener for animations
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key.toUpperCase() === 'Q') {
-			castFireball();
-		}
+	// Updates animation frame based on time
+	function animate(time: number) {
+		drawSpells.forEach(spell => {
+			if (!spell.startTime) spell.startTime = time;
+
+			const elapsedTime = time - spell.startTime;
+			const progress = Math.min(elapsedTime / spell.duration, 1);
+
+			// Split movement into two phases: static (first 30%) and moving (remaining 70%)
+			if (spell.abilityFolder.name === 'flame10') {
+				if (progress > 0.3) {
+					const moveProgress = (progress - 0.3) / 0.7; // Normalize movement phase progress
+					spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
+				}
+				spell.y = spell.startY; // No vertical movement in this example
+			}
+
+			// Calculate frame based on full progress
+			spell.currentFrame = Math.floor(progress * (spell.abilityFolder.frameCount - 1));
+			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
+
+			// Mark spell as done if progress reaches 1
+			if (progress >= 1) spell.draw = false;
+		});
+
+		// Filter out completed spells and draw the scene
+		drawSpells = drawSpells.filter(spell => spell.draw);
+		drawScene(game, gl, shaderProgram, textures, drawSpells);
+
+		requestAnimationFrame(animate);
 	}
 
+	// Handle 'Q' keydown event to cast fireball
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key.toUpperCase() === 'Q') castFireball();
+	}
+
+	// Set up and tear down
 	onMount(() => {
 		initialize();
 		window.addEventListener('keydown', handleKeydown);
