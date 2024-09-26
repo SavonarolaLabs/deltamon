@@ -23,6 +23,24 @@ function getSlotPosition(index: number): [number, number] {
 	return slotPositions[indexMap[index]];
 }
 
+let positionBuffer: WebGLBuffer;
+let textureCoordBuffer: WebGLBuffer;
+let positionAttribute: number;
+let textureCoordAttribute: number;
+let samplerUniform: WebGLUniformLocation;
+
+export function initDrawScene(gl: WebGLRenderingContext, shaderProgram: WebGLProgram) {
+	({ positionBuffer, textureCoordBuffer } = initBuffers(gl));
+
+	positionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
+	textureCoordAttribute = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
+	samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler')!;
+
+	gl.enableVertexAttribArray(positionAttribute);
+	gl.enableVertexAttribArray(textureCoordAttribute);
+	gl.uniform1i(samplerUniform, 0);
+}
+
 export function drawScene(
 	game: GameState,
 	gl: WebGLRenderingContext,
@@ -32,24 +50,11 @@ export function drawScene(
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
-	const { positionBuffer, textureCoordBuffer } = initBuffers(gl);
-
-	// Draw the background using the unified textures array
 	const backgroundTexture = textures['/bg/current.png'];
 	if (backgroundTexture) {
 		drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundTexture);
 	}
 
-	// Set up shared attributes
-	const positionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
-	const textureCoordAttribute = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
-	const samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler');
-
-	gl.enableVertexAttribArray(positionAttribute);
-	gl.enableVertexAttribArray(textureCoordAttribute);
-	gl.uniform1i(samplerUniform, 0);
-
-	// Draw creatures in slots
 	game.slots.forEach((slot, index) => {
 		if (slot.creature) {
 			const textureKey = `/monster/${slot.creature.img}`;
@@ -74,7 +79,6 @@ export function drawScene(
 		}
 	});
 
-	// Draw the ability (spells) moving across the screen
 	for (let spell of drawSpells) {
 		if (spell.draw) {
 			const frameTexture = textures[spell.texturePath];

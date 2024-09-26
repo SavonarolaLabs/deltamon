@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { initWebGL } from '$lib/webgl/initWebGL';
-	import { drawScene } from './draw';
+	import { drawScene, initDrawScene } from './draw';
 	import { loadAllTextures } from './textures';
 	import { game } from '$lib/pvp/game';
 	import { abilityFolders } from './abilityFolders';
@@ -87,6 +87,7 @@
 		if (result) {
 			({ gl, shaderProgram, buffers } = result);
 			textures = await loadAllTextures(gl);
+			initDrawScene(gl, shaderProgram); // Initialize buffers and attributes
 			requestAnimationFrame(animate);
 		}
 	}
