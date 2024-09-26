@@ -5,7 +5,7 @@ const GY = 0.15;
 /* prettier-ignore */
 const X1 = 0.8, X2 = X1 - 0.3;
 /* prettier-ignore */
-const Y1 = 0.6, Y2 = Y1 - 0.45, Y3 = Y1 - 0.45 * 2;
+const Y1 = 0.55, Y2 = Y1 - 0.45, Y3 = Y1 - 0.45 * 2;
 /* prettier-ignore */
 const slotPositions = [
     [-X1, Y1],      [-X2, Y1],      [X2, Y1],      [X1, Y1],

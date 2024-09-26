@@ -7,7 +7,9 @@
 	import { playAudio, playAudioAfterDelay } from './audio';
 	import { createFlame10, createFlame2 } from './spells';
 	import { initializeSlotRenderData } from './slotRenderData';
+	import { applyHoverAnimation } from './hoverAnimation';
 	import type { DrawSpell, SlotRenderData } from '$lib/types';
+	import { startMatch } from '$lib/pvp/gameloop';
 
 	let canvas: HTMLCanvasElement;
 	let gl: WebGLRenderingContext | null;
@@ -55,6 +57,7 @@
 	}
 
 	// Animate spells and slots
+	// Animate spells and slots
 	function animate(time: number) {
 		drawSpells.forEach(spell => {
 			if (!spell.startTime) spell.startTime = time;
@@ -76,6 +79,21 @@
 			if (progress >= 1) spell.draw = false;
 		});
 
+		// Apply hover effect to active creature
+		const activeCreature = game.activeCreature;
+		if (activeCreature) {
+			const activeSlotIndex = game.slots.findIndex(
+				slot => slot.creature?.bcId === activeCreature.bcId
+			);
+			if (activeSlotIndex !== -1) {
+				// Apply hover animation to the active slot
+				slotRenderData[activeSlotIndex] = applyHoverAnimation(
+					slotRenderData[activeSlotIndex],
+					time
+				);
+			}
+		}
+
 		drawSpells = drawSpells.filter(spell => spell.draw);
 		drawScene(game, slotRenderData, gl, shaderProgram, textures, drawSpells);
 
@@ -89,6 +107,8 @@
 
 	// Set up and tear down
 	onMount(() => {
+		startMatch(game);
+		game.activeCreature = game.slots[1].creature;
 		initialize();
 		window.addEventListener('keydown', handleKeydown);
 	});
