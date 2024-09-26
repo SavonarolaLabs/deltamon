@@ -64,6 +64,9 @@
 	}
 
 	function castFireball() {
+		const audio = new Audio('/mp3/hadouken.mp3');
+		audio.play();
+
 		const flame10 = {
 			currentFrame: 0,
 			spellSpeed: 0.03,
