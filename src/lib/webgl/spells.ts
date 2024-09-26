@@ -1,13 +1,15 @@
 import { abilityFolders } from './abilityFolders';
 import type { DrawSpell } from '$lib/types';
 
+const FLAME10_DURATION = 350; // Duration in ms for flame10
+const FLAME2_DURATION = 200; // Duration in ms for flame2
+
 export function createFlame10(): DrawSpell {
 	return {
 		currentFrame: 0,
-		spellSpeed: 0.03,
-		animationSpeed: 12,
+		duration: FLAME10_DURATION, // Use duration for interpolation
 		lastTime: 0,
-		startX: -0.65,
+		startX: -0.55,
 		startY: 0.7,
 		endX: 0.35,
 		abilityFolder: abilityFolders.find(a => a.name == 'flame10')!,
@@ -23,8 +25,7 @@ export function createFlame10(): DrawSpell {
 export function createFlame2(flame10: DrawSpell): DrawSpell {
 	return {
 		currentFrame: 0,
-		spellSpeed: 0,
-		animationSpeed: 15,
+		duration: FLAME2_DURATION, // Use duration for static display of frames
 		lastTime: 0,
 		startX: flame10.endX * 1.4,
 		startY: flame10.startY,

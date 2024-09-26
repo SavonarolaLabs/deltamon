@@ -86,8 +86,7 @@ export type AbilityFolder = {
 export type DrawSpell = {
 	// animate
 	currentFrame: number;
-	spellSpeed: number;
-	animationSpeed: number;
+	duration: number;
 	lastTime: number;
 	startX: number;
 	startY: number;

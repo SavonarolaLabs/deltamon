@@ -28,13 +28,19 @@
 	function animate(time: number) {
 		for (const spell of drawSpells) {
 			const elapsedTime = time - spell.lastTime;
-			if (elapsedTime >= spell.animationSpeed) {
+
+			if (elapsedTime >= spell.duration / spell.abilityFolder.frameCount) {
+				spell.currentFrame++;
 				spell.currentFrame++;
 				spell.lastTime = time;
 			}
 
-			if (spell.x < spell.endX) {
-				spell.x += spell.spellSpeed;
+			// Interpolate flame10's position based on time
+			if (spell.abilityFolder.name === 'flame10') {
+				if (!spell.startTime) spell.startTime = time; // Set startTime only once
+				const progress = Math.min((time - spell.startTime) / spell.duration, 1); // Clamp between 0 and 1
+				spell.x = spell.startX + (spell.endX - spell.startX) * progress;
+				spell.y = spell.startY; // No vertical movement in this example
 			}
 
 			// Check if spell is completed
