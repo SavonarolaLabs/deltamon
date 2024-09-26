@@ -84,7 +84,7 @@ export type AbilityFolder = {
 };
 
 export type DrawSpell = {
-	// animation
+	// animate
 	currentFrame: number;
 	spellSpeed: number;
 	animationSpeed: number;
@@ -93,7 +93,7 @@ export type DrawSpell = {
 	startY: number;
 	endX: number;
 
-	// rendering
+	// render
 	abilityFolder: AbilityFolder;
 	texturePath: string;
 	x: number;
