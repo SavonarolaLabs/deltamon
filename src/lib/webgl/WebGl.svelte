@@ -13,24 +13,7 @@
 	let buffers: any;
 	let textures: { [key: string]: WebGLTexture } = {};
 
-	let drawSpells: DrawSpell[] = [
-		{
-			currentFrame: 0,
-			spellSpeed: 0.03,
-			animationSpeed: 12,
-			lastTime: 0,
-			startX: -0.65,
-			startY: 0.7,
-			endX: 0.4,
-
-			abilityFolder: abilityFolders.find(a => a.name == 'flame10')!,
-			texturePath: `/abilities/flame10/0000.png`,
-			x: -0.65,
-			y: 0.7,
-			scale: 0.5,
-			draw: true,
-		},
-	];
+	let drawSpells: DrawSpell[] = [];
 
 	// Clear textures
 	function clearTextures() {
@@ -53,12 +36,16 @@
 				spell.x += spell.spellSpeed;
 			}
 
+			// Check if spell is completed
 			if (spell.currentFrame >= spell.abilityFolder.frameCount) {
 				spell.draw = false;
 			}
 
 			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
 		}
+
+		// Filter out completed spells
+		drawSpells = drawSpells.filter(spell => spell.draw);
 
 		drawScene(game, gl, shaderProgram, textures, drawSpells);
 
@@ -76,15 +63,51 @@
 		}
 	}
 
+	function castFireball() {
+		const flame10 = {
+			currentFrame: 0,
+			spellSpeed: 0.03,
+			animationSpeed: 12,
+			lastTime: 0,
+			startX: -0.65,
+			startY: 0.7,
+			endX: 0.35,
+			abilityFolder: abilityFolders.find(a => a.name == 'flame10')!,
+			texturePath: `/abilities/flame10/0000.png`,
+			x: -0.65,
+			y: 0.7,
+			scale: 0.5,
+			draw: true,
+			z: 1,
+		};
+
+		drawSpells.push(flame10);
+
+		setTimeout(() => {
+			const flame2 = {
+				currentFrame: 0,
+				spellSpeed: 0,
+				animationSpeed: 15,
+				lastTime: 0,
+				startX: flame10.endX * 1.4,
+				startY: flame10.startY,
+				endX: flame10.endX,
+				abilityFolder: abilityFolders.find(a => a.name == 'flame2')!,
+				texturePath: `/abilities/flame2/0000.png`,
+				x: flame10.endX * 1.4,
+				y: flame10.startY * 0.9,
+				scale: 0.7,
+				draw: true,
+				z: 0,
+			};
+			drawSpells.push(flame2);
+		}, 500);
+	}
+
 	// Event listener for animations
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key.toUpperCase() === 'Q') {
-			for (const spell of drawSpells) {
-				spell.currentFrame = 0;
-				spell.x = spell.startX;
-				spell.draw = true;
-				spell.lastTime = 0;
-			}
+			castFireball();
 		}
 	}
 

@@ -79,7 +79,7 @@ export function drawScene(
 		}
 	});
 
-	for (let spell of drawSpells) {
+	for (let spell of drawSpells.sort((a, b) => a.z - b.z)) {
 		if (spell.draw) {
 			const frameTexture = textures[spell.texturePath];
 			if (frameTexture) {

@@ -98,6 +98,7 @@ export type DrawSpell = {
 	texturePath: string;
 	x: number;
 	y: number;
+	z: number;
 	scale: number;
 	draw: boolean;
 };
