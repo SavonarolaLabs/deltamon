@@ -35,6 +35,8 @@ export function initializeSlotRenderData(game: GameState): SlotRenderData[] {
 			scale: 0.21, // default scale, adjust as needed
 			zIndex: 0, // default z-index
 			isHovered: false,
+			originalX: x,
+			originalY: y,
 		};
 	});
 }

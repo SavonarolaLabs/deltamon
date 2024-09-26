@@ -20,6 +20,11 @@
 	let drawSpells: DrawSpell[] = [];
 	let slotRenderData: SlotRenderData[] = [];
 
+	const targetSlotIndex = 6; // Target index for the impact animation
+	let impactStartTime: number | null = null;
+	const impactDuration = 300; // Duration for the impact effect in ms
+	const kickOffset = 0.02; // Kick distance
+
 	// Initialize WebGL and textures
 	async function initialize() {
 		const result = initWebGL(canvas);
@@ -54,10 +59,12 @@
 		setTimeout(() => {
 			const flame2 = createFlame2(flame10);
 			drawSpells.push(flame2);
+
+			// Set the start time for the impact effect
+			impactStartTime = performance.now();
 		}, 500);
 	}
 
-	// Animate spells and slots
 	// Animate spells and slots
 	function animate(time: number) {
 		drawSpells.forEach(spell => {
@@ -92,6 +99,23 @@
 					slotRenderData[activeSlotIndex],
 					time
 				);
+			}
+		}
+
+		if (impactStartTime) {
+			const elapsedImpactTime = time - impactStartTime;
+			const impactProgress = Math.min(elapsedImpactTime / impactDuration, 1);
+			const easedImpactProgress = Math.sin(impactProgress * Math.PI); // Ease in/out effect
+
+			// Calculate the new x position based on kick offset
+			slotRenderData[targetSlotIndex].x =
+				slotRenderData[targetSlotIndex].originalX + kickOffset * easedImpactProgress;
+
+			// Reset impact animation after completion
+			if (impactProgress >= 1) {
+				// Ensure the slot returns precisely to its original position
+				slotRenderData[targetSlotIndex].x = slotRenderData[targetSlotIndex].originalX;
+				impactStartTime = null;
 			}
 		}
 

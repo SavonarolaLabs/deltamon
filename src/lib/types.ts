@@ -108,6 +108,8 @@ export type SlotRenderData = {
 	slotIndex: number;
 	playerId: number;
 	texturePath: string;
+	originalX: number;
+	originalY: number;
 	x: number;
 	y: number;
 	scale: number;
