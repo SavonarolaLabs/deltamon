@@ -19,6 +19,7 @@
 
 	let drawSpells: DrawSpell[] = [];
 	let slotRenderData: SlotRenderData[] = [];
+	let animationFrameId: number;
 
 	const activeSlotIndex = 1;
 	let targetSlotIndex = 6;
@@ -46,8 +47,10 @@
 			textures = await loadAllTextures(gl);
 			initDrawScene(gl, shaderProgram);
 			slotRenderData = initializeSlotRenderData(game);
-			slotRenderData[activeSlotIndex].zIndex = 1;
-			requestAnimationFrame(animate);
+			if (slotRenderData[activeSlotIndex]) {
+				slotRenderData[activeSlotIndex].zIndex = 1;
+			}
+			animationFrameId = requestAnimationFrame(animate);
 		}
 	}
 
@@ -75,70 +78,89 @@
 	}
 
 	function animate(time: number) {
+		updateSpells(time);
+		updateActiveCreature(time);
+		updateActiveSlotMovement(time);
+		updateImpactAnimation(time);
+
+		drawScene(game, slotRenderData, gl, shaderProgram, textures, drawSpells);
+		animationFrameId = requestAnimationFrame(animate);
+	}
+
+	function updateSpells(time: number) {
 		drawSpells.forEach(spell => {
 			if (!spell.startTime) spell.startTime = time;
 			const elapsedTime = time - spell.startTime;
 			const progress = Math.min(elapsedTime / spell.duration, 1);
 			spell.currentFrame = Math.floor(progress * (spell.abilityFolder.frameCount - 1));
-			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
-			if (spell.abilityFolder.name === 'flame10') {
-				if (progress > 0.3) {
-					const moveProgress = (progress - 0.3) / 0.7;
-					spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
-					spell.y = spell.startY + (spell.endY - spell.startY) * moveProgress;
-				}
+			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame
+				.toString()
+				.padStart(4, '0')}.png`;
+
+			if (spell.abilityFolder.name === 'flame10' && progress > 0.3) {
+				const moveProgress = (progress - 0.3) / 0.7;
+				spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
+				spell.y = spell.startY + (spell.endY - spell.startY) * moveProgress;
 			}
+
 			if (progress >= 1) spell.draw = false;
 		});
 
+		drawSpells = drawSpells.filter(spell => spell.draw);
+	}
+
+	function updateActiveCreature(time: number) {
 		const activeCreature = game.activeCreature;
 		if (activeCreature) {
-			const activeCreatureSlotIndex = game.slots.findIndex(
-				slot => slot.creature?.bcId === activeCreature.bcId
-			);
-			if (activeCreatureSlotIndex !== -1) {
+			const activeCreatureSlotIndex = game.slots.findIndex(slot => slot.creature?.bcId === activeCreature.bcId);
+			if (activeCreatureSlotIndex !== -1 && slotRenderData[activeCreatureSlotIndex]) {
 				slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(
 					slotRenderData[activeCreatureSlotIndex],
 					time
 				);
 			}
 		}
+	}
 
-		if (activeSlotMoveStartTime) {
+	function updateActiveSlotMovement(time: number) {
+		if (activeSlotMoveStartTime && slotRenderData[activeSlotIndex]) {
 			const elapsedMoveTime = time - activeSlotMoveStartTime;
 			const moveProgress = Math.min(elapsedMoveTime / activeSlotMoveDuration, 1);
 			const easedMoveProgress = Math.sin(moveProgress * Math.PI);
+
 			slotRenderData[activeSlotIndex].x =
-				slotRenderData[activeSlotIndex].originalX +
-				activeSlotMoveOffset * easedMoveProgress;
+				slotRenderData[activeSlotIndex].originalX + activeSlotMoveOffset * easedMoveProgress;
+
 			if (moveProgress >= 1) {
 				slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX;
 				activeSlotMoveStartTime = null;
 			}
 		}
+	}
 
-		if (impactStartTime) {
+	function updateImpactAnimation(time: number) {
+		if (impactStartTime && slotRenderData[targetSlotIndex]) {
 			const elapsedImpactTime = time - impactStartTime;
 			const impactProgress = Math.min(elapsedImpactTime / impactDuration, 1);
 			const easedImpactProgress = Math.sin(impactProgress * Math.PI);
+
 			slotRenderData[targetSlotIndex].x =
 				slotRenderData[targetSlotIndex].originalX + kickOffset * easedImpactProgress;
 			slotRenderData[targetSlotIndex].whiteFlash = 0.9 * (1 - impactProgress);
+
 			if (impactProgress >= 1) {
 				slotRenderData[targetSlotIndex].x = slotRenderData[targetSlotIndex].originalX;
 				slotRenderData[targetSlotIndex].whiteFlash = 0;
 				impactStartTime = null;
 			}
 		}
-
-		drawSpells = drawSpells.filter(spell => spell.draw);
-		drawScene(game, slotRenderData, gl, shaderProgram, textures, drawSpells);
-		requestAnimationFrame(animate);
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toUpperCase();
+		//@ts-ignore
 		if (keyToSlotIndex[key] !== undefined) {
+			//@ts-ignore
 			castFireball(keyToSlotIndex[key]);
 		}
 	}
@@ -151,9 +173,9 @@
 	});
 
 	onDestroy(() => {
-		window.cancelAnimationFrame(animate);
+		window.cancelAnimationFrame(animationFrameId);
 		clearTextures();
-		if (gl) {
+		if (gl && shaderProgram && buffers) {
 			gl.deleteProgram(shaderProgram);
 			gl.deleteBuffer(buffers.positionBuffer);
 			gl.deleteBuffer(buffers.textureCoordBuffer);
