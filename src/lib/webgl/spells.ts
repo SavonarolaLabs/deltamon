@@ -22,7 +22,7 @@ export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRender
 		texturePath: `/abilities/flame10/0000.png`,
 		x: sourceSlot.x - 0.12,
 		y: sourceSlot.y,
-		scale: 0.8,
+		scale: 1,
 		draw: true,
 		zIndex: 3,
 		angle, // Include the calculated angle
