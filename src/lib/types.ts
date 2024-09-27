@@ -97,9 +97,10 @@ export type DrawSpell = {
 	texturePath: string;
 	x: number;
 	y: number;
-	z: number;
 	scale: number;
+	zIndex: number;
 	draw: boolean;
+	whiteFlash?: number;
 	angle?: number; // New property
 };
 

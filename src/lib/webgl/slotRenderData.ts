@@ -6,30 +6,50 @@ export function initializeSlotRenderData(game: GameState, gl: WebGLRenderingCont
 	const canvasWidth = gl.canvas.width;
 	const canvasHeight = gl.canvas.height;
 
-	// Number of columns and rows for slot arrangement
-	const cols = 6;
-	const rows = 2;
+	// Original slot position constants
+	const GY = 0.15;
+	const X1 = 0.8,
+		X2 = X1 - 0.3;
+	const Y1 = 0.55,
+		Y2 = Y1 - 0.45,
+		Y3 = Y1 - 0.45 * 2;
 
-	// Calculate spacing between slots
-	const xSpacing = canvasWidth / (cols + 1);
-	const yPositions = [canvasHeight * 0.25, canvasHeight * 0.75]; // Adjust as needed
+	// Array of normalized positions based on old logic
+	const slotPositions = [
+		[-X1, Y1],
+		[-X2, Y1],
+		[X2, Y1],
+		[X1, Y1],
+		[-X1, Y2 - GY],
+		[-X2, Y2 - GY],
+		[X2, Y2 - GY],
+		[X1, Y2 - GY],
+		[-X1, Y3 - GY * 2],
+		[-X2, Y3 - GY * 2],
+		[X2, Y3 - GY * 2],
+		[X1, Y3 - GY * 2],
+	];
+
+	// Map of index order based on your original layout
+	const indexMap = [0, 1, 4, 5, 8, 9, 2, 3, 6, 7, 10, 11];
 
 	for (let index = 0; index < game.slots.length; index++) {
 		const slot = game.slots[index];
 		const playerId = slot.creature?.playerId || 1; // Assuming default playerId is 1
 		const texturePath = slot.creature ? `/monster/${slot.creature.img}` : '';
 
-		// Column index
-		const col = index % cols;
+		// Get slot position index based on original mapping
+		const positionIndex = indexMap[index];
 
-		// X position
-		const x = xSpacing * (col + 1);
+		// Get the normalized position
+		const [normX, normY] = slotPositions[positionIndex];
 
-		// Y position based on player ID
-		const y = playerId === 1 ? yPositions[1] : yPositions[0];
+		// Convert normalized positions to pixel positions
+		const x = ((normX + 1) / 2) * canvasWidth;
+		const y = ((1 - normY) / 2) * canvasHeight;
 
 		// Adjust scale as needed (now in pixels)
-		const scale = 0.5; // Adjust based on your texture sizes
+		const scale = 0.66; // Adjust based on your texture sizes
 
 		slotRenderData.push({
 			slotIndex: index,
@@ -38,7 +58,7 @@ export function initializeSlotRenderData(game: GameState, gl: WebGLRenderingCont
 			x,
 			y,
 			scale,
-			zIndex: 0,
+			zIndex: index == 1 ? 1 : 0,
 			isHovered: false,
 			originalX: x,
 			originalY: y,

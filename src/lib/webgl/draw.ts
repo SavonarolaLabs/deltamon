@@ -53,10 +53,12 @@ export function drawScene(
 	}
 
 	// Collect all elements to draw
-	const allElements = [
-		...slotRenderData.map(slot => ({ ...slot, type: 'slot' })),
-		...drawSpells.filter(spell => spell.draw).map(spell => ({ ...spell, type: 'spell' })),
-	].sort((a, b) => (a.zIndex ?? a.z) - (b.zIndex ?? b.z));
+	const allElements = [...slotRenderData, ...drawSpells.filter(spell => spell.draw)].sort(
+		(a, b) => a.zIndex - b.zIndex
+	);
+	if (allElements.some(e => e.zIndex == 1)) {
+		console.log('zindesdfsd');
+	}
 
 	for (const element of allElements) {
 		const textureMetadata = textures[element.texturePath];

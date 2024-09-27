@@ -1,7 +1,7 @@
 import { abilityFolders } from './abilityFolders';
 import type { DrawSpell, SlotRenderData } from '$lib/types';
 
-const FLAME10_DURATION = 500; // Duration in ms for flame10
+const FLAME10_DURATION = 600; // Duration in ms for flame10
 const FLAME2_DURATION = 200; // Duration in ms for flame2
 
 // Create flame10 (fireball) spell
@@ -22,9 +22,9 @@ export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRender
 		texturePath: `/abilities/flame10/0000.png`,
 		x: sourceSlot.x - 0.12,
 		y: sourceSlot.y,
-		scale: 0.5,
+		scale: 0.8,
 		draw: true,
-		z: 3,
+		zIndex: 3,
 		angle, // Include the calculated angle
 	};
 }
@@ -45,7 +45,7 @@ export function createFlame2(targetSlot: SlotRenderData): DrawSpell {
 		y: targetSlot.y,
 		scale: 0.7,
 		draw: true,
-		z: 2,
+		zIndex: 2,
 		angle: 0, // No rotation needed for flame2
 	};
 }

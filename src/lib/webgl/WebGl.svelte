@@ -52,12 +52,7 @@
 			textures = await loadAllTextures(gl);
 			initDrawScene(gl, shaderProgram);
 			slotRenderData = initializeSlotRenderData(game, gl);
-			if (slotRenderData[activeSlotIndex]) {
-				slotRenderData[activeSlotIndex].zIndex = 1;
-			}
-
 			handleResize();
-
 			animationFrameId = requestAnimationFrame(animate);
 		}
 	}
