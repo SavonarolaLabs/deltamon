@@ -1,7 +1,7 @@
 import { abilityFolders } from './abilityFolders';
 import type { DrawSpell, SlotRenderData } from '$lib/types';
 
-const FLAME10_DURATION = 450; // Duration in ms for flame10
+const FLAME10_DURATION = 500; // Duration in ms for flame10
 const FLAME2_DURATION = 200; // Duration in ms for flame2
 
 // Create flame10 (fireball) spell
@@ -16,7 +16,7 @@ export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRender
 		endY: targetSlot.y,
 		abilityFolder: abilityFolders.find(a => a.name == 'flame10')!,
 		texturePath: `/abilities/flame10/0000.png`,
-		x: sourceSlot.x,
+		x: sourceSlot.x - 0.12,
 		y: sourceSlot.y,
 		scale: 0.5,
 		draw: true,

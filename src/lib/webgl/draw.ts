@@ -16,11 +16,9 @@ let samplerUniform: WebGLUniformLocation;
 
 export function initDrawScene(gl: WebGLRenderingContext, shaderProgram: WebGLProgram) {
 	({ positionBuffer, textureCoordBuffer } = initBuffers(gl));
-
 	positionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
 	textureCoordAttribute = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
 	samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler')!;
-
 	gl.enableVertexAttribArray(positionAttribute);
 	gl.enableVertexAttribArray(textureCoordAttribute);
 	gl.uniform1i(samplerUniform, 0);
@@ -31,27 +29,18 @@ export function drawScene(
 	slotRenderData: SlotRenderData[],
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
-	textures: TextureMetadataMap, // Updated type
+	textures: TextureMetadataMap,
 	drawSpells: DrawSpell[]
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
-	// Draw background
 	const backgroundMetadata = textures['/bg/current.png'];
 	if (backgroundMetadata) {
-		drawBackground(
-			gl,
-			shaderProgram,
-			positionBuffer,
-			textureCoordBuffer,
-			backgroundMetadata.texture
-		);
+		drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundMetadata);
 	}
 
-	// Sort slots by zIndex before rendering
 	const sortedSlots = slotRenderData.slice().sort((a, b) => a.zIndex - b.zIndex);
 
-	// Draw creatures in sorted order
 	sortedSlots.forEach(slot => {
 		const textureMetadata = textures[slot.texturePath];
 		if (textureMetadata) {
@@ -60,20 +49,19 @@ export function drawScene(
 				shaderProgram,
 				positionBuffer,
 				textureCoordBuffer,
-				textureMetadata.texture, // Use texture from metadata
+				textureMetadata,
 				slot.x,
 				slot.y,
 				slot.scale,
 				positionAttribute,
 				textureCoordAttribute,
-				slot.whiteFlash // Pass white flash value
+				slot.whiteFlash
 			);
 		} else {
 			console.warn(`Texture not found for path: ${slot.texturePath}`);
 		}
 	});
 
-	// Draw spells (they will also respect z-order if needed)
 	for (let spell of drawSpells.sort((a, b) => a.z - b.z)) {
 		if (spell.draw) {
 			const frameMetadata = textures[spell.texturePath];
@@ -83,7 +71,7 @@ export function drawScene(
 					shaderProgram,
 					positionBuffer,
 					textureCoordBuffer,
-					frameMetadata.texture, // Use texture from metadata
+					frameMetadata,
 					spell.x,
 					spell.y,
 					spell.scale,
@@ -102,19 +90,18 @@ function drawElement(
 	shaderProgram: WebGLProgram,
 	positionBuffer: WebGLBuffer,
 	textureCoordBuffer: WebGLBuffer,
-	texture: WebGLTexture,
+	textureMetadata: TextureMetadata,
 	x: number,
 	y: number,
 	scale: number,
 	positionAttribute: number,
 	textureCoordAttribute: number,
-	whiteFlash: number = 0 // Default no flash
+	whiteFlash: number = 0
 ) {
-	const { scaleX, scaleY } = calculateScaling(gl, scale, 1); // Aspect ratio placeholder
+	const { scaleX, scaleY } = calculateScaling(gl, scale, textureMetadata.aspectRatio);
 	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
-	bindTextureAndCoords(gl, texture, textureCoordBuffer, textureCoordAttribute);
+	bindTextureAndCoords(gl, textureMetadata.texture, textureCoordBuffer, textureCoordAttribute);
 
-	// Apply white flash as a uniform
 	const whiteFlashUniform = gl.getUniformLocation(shaderProgram, 'uWhiteFlash');
 	gl.uniform1f(whiteFlashUniform, whiteFlash);
 
@@ -123,10 +110,9 @@ function drawElement(
 
 function calculateScaling(gl: WebGLRenderingContext, scale: number, imgAspectRatio: number) {
 	const canvasAspectRatio = gl.canvas.width / gl.canvas.height;
-	const cardAspectRatio = 614 / 868; // Default card aspect ratio
 
 	let scaleX = scale;
-	let scaleY = scaleX / cardAspectRatio;
+	let scaleY = scaleX / imgAspectRatio;
 
 	if (canvasAspectRatio > 1) {
 		scaleX /= canvasAspectRatio;
