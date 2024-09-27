@@ -46,7 +46,7 @@
 			textures = await loadAllTextures(gl);
 			initDrawScene(gl, shaderProgram);
 			slotRenderData = initializeSlotRenderData(game);
-			slotRenderData[activeSlotIndex].zIndex = 10;
+			slotRenderData[activeSlotIndex].zIndex = 1;
 			requestAnimationFrame(animate);
 		}
 	}

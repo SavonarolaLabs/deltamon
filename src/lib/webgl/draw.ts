@@ -1,10 +1,4 @@
-import type {
-	DrawSpell,
-	GameState,
-	SlotRenderData,
-	TextureMetadataMap,
-	TextureMetadata,
-} from '$lib/types';
+import type { DrawSpell, GameState, SlotRenderData, TextureMetadataMap, TextureMetadata } from '$lib/types';
 import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
@@ -43,7 +37,7 @@ export function drawScene(
 	const allElements = [
 		...slotRenderData.map(slot => ({ ...slot, type: 'slot' })),
 		...drawSpells.filter(spell => spell.draw).map(spell => ({ ...spell, type: 'spell' })),
-	].sort((a, b) => (a.zIndex || a.z) ?? 0 - (b.zIndex || b.z) ?? 0);
+	].sort((a, b) => (a.zIndex ?? a.z) - (b.zIndex ?? b.z));
 
 	for (const element of allElements) {
 		const textureMetadata = textures[element.texturePath];
@@ -85,68 +79,58 @@ function drawElement(
 	angle: number = 0,
 	whiteFlashUniform: WebGLUniformLocation
 ) {
-	const { scaleX, scaleY } = calculateScaling(gl, scale, textureMetadata.aspectRatio);
+	const canvasWidth = gl.canvas.width;
+	const canvasHeight = gl.canvas.height;
+	const imageWidth = textureMetadata.width;
+	const imageHeight = textureMetadata.height;
 
-	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute, angle);
-	bindTextureAndCoords(gl, textureMetadata.texture, textureCoordBuffer, textureCoordAttribute);
+	const widthRatio = imageWidth / canvasWidth;
+	const heightRatio = imageHeight / canvasHeight;
 
-	gl.uniform1f(whiteFlashUniform, whiteFlash);
+	let adjustedScaleX, adjustedScaleY;
 
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-}
-
-function calculateScaling(gl: WebGLRenderingContext, scale: number, imgAspectRatio: number) {
-	const canvasAspectRatio = gl.canvas.width / gl.canvas.height;
-
-	let scaleX = scale;
-	let scaleY = scaleX / imgAspectRatio;
-
-	if (canvasAspectRatio > 1) {
-		scaleX /= canvasAspectRatio;
+	// Apply scale to match image aspect ratio and canvas size without over-scaling
+	if (widthRatio < heightRatio) {
+		adjustedScaleX = scale * (2.0 / canvasWidth) * imageWidth;
+		adjustedScaleY = scale * (2.0 / canvasHeight) * imageHeight;
 	} else {
-		scaleY *= canvasAspectRatio;
+		adjustedScaleY = scale * (2.0 / canvasHeight) * imageHeight;
+		adjustedScaleX = scale * (2.0 / canvasWidth) * imageWidth;
 	}
 
-	return { scaleX, scaleY };
-}
-
-function setPositionBuffer(
-	gl: WebGLRenderingContext,
-	positionBuffer: WebGLBuffer,
-	x: number,
-	y: number,
-	scaleX: number,
-	scaleY: number,
-	positionAttribute: number,
-	angle: number = 0
-) {
-	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
+	// Compute rotation
 	const cos = Math.cos(angle);
 	const sin = Math.sin(angle);
 
+	// Define positions for vertices after scaling and rotation
 	const positions = new Float32Array([
-		-scaleX * cos - scaleY * sin + x,
-		-scaleX * sin + scaleY * cos + y, // Top-left
-		-scaleX * cos + scaleY * sin + x,
-		-scaleX * sin - scaleY * cos + y, // Bottom-left
-		scaleX * cos - scaleY * sin + x,
-		scaleX * sin + scaleY * cos + y, // Top-right
-		scaleX * cos + scaleY * sin + x,
-		scaleX * sin - scaleY * cos + y, // Bottom-right
+		-adjustedScaleX * cos - adjustedScaleY * sin + x,
+		-adjustedScaleX * sin + adjustedScaleY * cos + y, // Top-left
+		-adjustedScaleX * cos + adjustedScaleY * sin + x,
+		-adjustedScaleX * sin - adjustedScaleY * cos + y, // Bottom-left
+		adjustedScaleX * cos - adjustedScaleY * sin + x,
+		adjustedScaleX * sin + adjustedScaleY * cos + y, // Top-right
+		adjustedScaleX * cos + adjustedScaleY * sin + x,
+		adjustedScaleX * sin - adjustedScaleY * cos + y, // Bottom-right
 	]);
 
+	// Use the pre-initialized position buffer and set vertex positions
+	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
-}
+	gl.enableVertexAttribArray(positionAttribute);
 
-function bindTextureAndCoords(
-	gl: WebGLRenderingContext,
-	texture: WebGLTexture,
-	textureCoordBuffer: WebGLBuffer,
-	textureCoordAttribute: number
-) {
-	gl.bindTexture(gl.TEXTURE_2D, texture);
+	// Bind texture and use the pre-initialized texture coordinate buffer
+	gl.bindTexture(gl.TEXTURE_2D, textureMetadata.texture);
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+	const textureCoords = new Float32Array([0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]);
+	gl.bufferData(gl.ARRAY_BUFFER, textureCoords, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(textureCoordAttribute);
+
+	// Apply white flash uniform
+	gl.uniform1f(whiteFlashUniform, whiteFlash);
+
+	// Draw the element
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
