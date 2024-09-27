@@ -118,3 +118,11 @@ export type SlotRenderData = {
 	isHovered: boolean;
 	whiteFlash?: number; // Percentage of white overlay (0-1)
 };
+
+export type TextureMetadata = {
+	texture: WebGLTexture;
+	width: number;
+	height: number;
+	aspectRatio: number;
+};
+export type TextureMetadataMap = { [key: string]: TextureMetadata };

@@ -1,4 +1,10 @@
-import type { DrawSpell, GameState, SlotRenderData } from '$lib/types';
+import type {
+	DrawSpell,
+	GameState,
+	SlotRenderData,
+	TextureMetadataMap,
+	TextureMetadata,
+} from '$lib/types';
 import { initBuffers } from './buffers';
 import { drawBackground } from './drawBackground';
 
@@ -25,15 +31,21 @@ export function drawScene(
 	slotRenderData: SlotRenderData[],
 	gl: WebGLRenderingContext,
 	shaderProgram: WebGLProgram,
-	textures: { [key: string]: WebGLTexture },
+	textures: TextureMetadataMap, // Updated type
 	drawSpells: DrawSpell[]
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	// Draw background
-	const backgroundTexture = textures['/bg/current.png'];
-	if (backgroundTexture) {
-		drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundTexture);
+	const backgroundMetadata = textures['/bg/current.png'];
+	if (backgroundMetadata) {
+		drawBackground(
+			gl,
+			shaderProgram,
+			positionBuffer,
+			textureCoordBuffer,
+			backgroundMetadata.texture
+		);
 	}
 
 	// Sort slots by zIndex before rendering
@@ -41,14 +53,14 @@ export function drawScene(
 
 	// Draw creatures in sorted order
 	sortedSlots.forEach(slot => {
-		const texture = textures[slot.texturePath];
-		if (texture) {
+		const textureMetadata = textures[slot.texturePath];
+		if (textureMetadata) {
 			drawElement(
 				gl,
 				shaderProgram,
 				positionBuffer,
 				textureCoordBuffer,
-				texture,
+				textureMetadata.texture, // Use texture from metadata
 				slot.x,
 				slot.y,
 				slot.scale,
@@ -64,14 +76,14 @@ export function drawScene(
 	// Draw spells (they will also respect z-order if needed)
 	for (let spell of drawSpells.sort((a, b) => a.z - b.z)) {
 		if (spell.draw) {
-			const frameTexture = textures[spell.texturePath];
-			if (frameTexture) {
+			const frameMetadata = textures[spell.texturePath];
+			if (frameMetadata) {
 				drawElement(
 					gl,
 					shaderProgram,
 					positionBuffer,
 					textureCoordBuffer,
-					frameTexture,
+					frameMetadata.texture, // Use texture from metadata
 					spell.x,
 					spell.y,
 					spell.scale,
@@ -98,7 +110,7 @@ function drawElement(
 	textureCoordAttribute: number,
 	whiteFlash: number = 0 // Default no flash
 ) {
-	const { scaleX, scaleY } = calculateScaling(gl, scale, 1);
+	const { scaleX, scaleY } = calculateScaling(gl, scale, 1); // Aspect ratio placeholder
 	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
 	bindTextureAndCoords(gl, texture, textureCoordBuffer, textureCoordAttribute);
 
@@ -111,7 +123,7 @@ function drawElement(
 
 function calculateScaling(gl: WebGLRenderingContext, scale: number, imgAspectRatio: number) {
 	const canvasAspectRatio = gl.canvas.width / gl.canvas.height;
-	const cardAspectRatio = 614 / 868;
+	const cardAspectRatio = 614 / 868; // Default card aspect ratio
 
 	let scaleX = scale;
 	let scaleY = scaleX / cardAspectRatio;

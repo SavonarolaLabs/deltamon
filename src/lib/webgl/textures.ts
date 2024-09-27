@@ -1,7 +1,5 @@
+import type { TextureMetadata, TextureMetadataMap } from '$lib/types';
 import { abilityFolders } from './abilityFolders';
-
-// Import WebGL-related types
-type WebGLTextureMap = { [key: string]: WebGLTexture };
 
 // Static array for creature and background textures
 const staticTexturePaths = [
@@ -11,11 +9,11 @@ const staticTexturePaths = [
 	'/bg/current.png',
 ];
 
-// Utility function to load textures from paths
+// Utility function to load textures from paths and also return their metadata
 export function loadTextureFromPath(
 	gl: WebGLRenderingContext,
 	imageUrl: string
-): Promise<WebGLTexture> {
+): Promise<TextureMetadata> {
 	return new Promise((resolve, reject) => {
 		const texture = gl.createTexture();
 		if (!texture) {
@@ -36,7 +34,13 @@ export function loadTextureFromPath(
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-			resolve(texture);
+			// Return texture and metadata in a single object
+			resolve({
+				texture,
+				width: image.width,
+				height: image.height,
+				aspectRatio: image.width / image.height,
+			});
 		};
 
 		image.onerror = () => {
@@ -46,13 +50,15 @@ export function loadTextureFromPath(
 }
 
 // Function to load all textures (creature, background, and ability textures)
-export async function loadAllTextures(gl: WebGLRenderingContext): Promise<WebGLTextureMap> {
-	const textureMap: WebGLTextureMap = {};
+// and return combined map
+export async function loadAllTextures(gl: WebGLRenderingContext): Promise<TextureMetadataMap> {
+	const textureMetadataMap: TextureMetadataMap = {};
 
 	// Load static creature and background textures
 	await Promise.all(
 		staticTexturePaths.map(async path => {
-			textureMap[path] = await loadTextureFromPath(gl, path);
+			const metadata = await loadTextureFromPath(gl, path);
+			textureMetadataMap[path] = metadata;
 		})
 	);
 
@@ -64,10 +70,11 @@ export async function loadAllTextures(gl: WebGLRenderingContext): Promise<WebGLT
 			Array.from({ length: frameCount }).map(async (_, i) => {
 				const frameName = `${i.toString().padStart(4, '0')}.png`;
 				const fullPath = `${path}/${frameName}`;
-				textureMap[fullPath] = await loadTextureFromPath(gl, fullPath);
+				const metadata = await loadTextureFromPath(gl, fullPath);
+				textureMetadataMap[fullPath] = metadata;
 			})
 		);
 	}
 
-	return textureMap;
+	return textureMetadataMap;
 }

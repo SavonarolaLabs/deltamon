@@ -8,30 +8,28 @@
 	import { createFlame10, createFlame2 } from './spells';
 	import { initializeSlotRenderData } from './slotRenderData';
 	import { applyHoverAnimation } from './hoverAnimation';
-	import type { DrawSpell, SlotRenderData } from '$lib/types';
+	import type { DrawSpell, SlotRenderData, TextureMetadataMap } from '$lib/types';
 	import { startMatch } from '$lib/pvp/gameloop';
 
 	let canvas: HTMLCanvasElement;
 	let gl: WebGLRenderingContext | null;
 	let shaderProgram: WebGLProgram | null;
 	let buffers: any;
-	let textures: { [key: string]: WebGLTexture } = {};
+	let textures: TextureMetadataMap = {};
 
 	let drawSpells: DrawSpell[] = [];
 	let slotRenderData: SlotRenderData[] = [];
 
-	const activeSlotIndex = 1; // Active slot index for movement
+	const activeSlotIndex = 1;
 	let targetSlotIndex = 6;
 	let impactStartTime: number | null = null;
-	const impactDuration = 300; // Duration for the impact effect in ms
-	const kickOffset = 0.02; // Kick distance
+	const impactDuration = 300;
+	const kickOffset = 0.02;
 
-	// Active slot movement parameters
 	let activeSlotMoveStartTime: number | null = null;
-	const activeSlotMoveDuration = 200; // Duration for the active slot move in ms
-	const activeSlotMoveOffset = -0.01; // Distance to move left
+	const activeSlotMoveDuration = 200;
+	const activeSlotMoveOffset = -0.01;
 
-	// Key-to-slot mapping
 	const keyToSlotIndex = {
 		Q: 6,
 		W: 7,
@@ -41,85 +39,64 @@
 		D: 11,
 	};
 
-	// Initialize WebGL and textures
 	async function initialize() {
 		const result = initWebGL(canvas);
 		if (result) {
 			({ gl, shaderProgram, buffers } = result);
 			textures = await loadAllTextures(gl);
 			initDrawScene(gl, shaderProgram);
-
-			// Initialize slot rendering data
 			slotRenderData = initializeSlotRenderData(game);
 			slotRenderData[activeSlotIndex].zIndex = 10;
-
 			requestAnimationFrame(animate);
 		}
 	}
 
-	// Clear all textures
 	function clearTextures() {
 		if (gl) {
-			Object.values(textures).forEach(texture => gl.deleteTexture(texture));
+			Object.values(textures).forEach(({ texture }) => gl.deleteTexture(texture));
 		}
 		textures = {};
 	}
 
-	// Add new fireball spell
 	function castFireball(targetIndex: number) {
 		targetSlotIndex = targetIndex;
-
-		// Get the source and target slot render data
 		const sourceSlot = slotRenderData[activeSlotIndex];
 		const targetSlot = slotRenderData[targetSlotIndex];
-
 		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
 		const flame10 = createFlame10(sourceSlot, targetSlot);
 		drawSpells.push(flame10);
-
-		// Start movement for the active slot
 		activeSlotMoveStartTime = performance.now();
-
 		playAudioAfterDelay('/mp3/Beating Punch.mp3', 350);
 		setTimeout(() => {
 			const flame2 = createFlame2(targetSlot);
 			drawSpells.push(flame2);
-
-			// Set the start time for the impact effect
 			impactStartTime = performance.now();
 		}, 500);
 	}
 
-	// Animate spells and slots
 	function animate(time: number) {
 		drawSpells.forEach(spell => {
 			if (!spell.startTime) spell.startTime = time;
-
 			const elapsedTime = time - spell.startTime;
 			const progress = Math.min(elapsedTime / spell.duration, 1);
-
 			spell.currentFrame = Math.floor(progress * (spell.abilityFolder.frameCount - 1));
 			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
-
 			if (spell.abilityFolder.name === 'flame10') {
 				if (progress > 0.3) {
 					const moveProgress = (progress - 0.3) / 0.7;
 					spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
-					spell.y = spell.startY + (spell.endY - spell.startY) * moveProgress; // Interpolate y position
+					spell.y = spell.startY + (spell.endY - spell.startY) * moveProgress;
 				}
 			}
-
 			if (progress >= 1) spell.draw = false;
 		});
 
-		// Apply hover effect to active creature
 		const activeCreature = game.activeCreature;
 		if (activeCreature) {
 			const activeCreatureSlotIndex = game.slots.findIndex(
 				slot => slot.creature?.bcId === activeCreature.bcId
 			);
 			if (activeCreatureSlotIndex !== -1) {
-				// Apply hover animation to the active slot
 				slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(
 					slotRenderData[activeCreatureSlotIndex],
 					time
@@ -127,52 +104,38 @@
 			}
 		}
 
-		// Apply active slot movement effect if started
 		if (activeSlotMoveStartTime) {
 			const elapsedMoveTime = time - activeSlotMoveStartTime;
 			const moveProgress = Math.min(elapsedMoveTime / activeSlotMoveDuration, 1);
-			const easedMoveProgress = Math.sin(moveProgress * Math.PI); // Ease in/out effect
-
-			// Move the active slot to the left slightly and back
+			const easedMoveProgress = Math.sin(moveProgress * Math.PI);
 			slotRenderData[activeSlotIndex].x =
 				slotRenderData[activeSlotIndex].originalX +
 				activeSlotMoveOffset * easedMoveProgress;
-
-			// Reset movement after completion
 			if (moveProgress >= 1) {
 				slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX;
 				activeSlotMoveStartTime = null;
 			}
 		}
 
-		// Apply impact animation to target slot if impact has started
 		if (impactStartTime) {
 			const elapsedImpactTime = time - impactStartTime;
 			const impactProgress = Math.min(elapsedImpactTime / impactDuration, 1);
-			const easedImpactProgress = Math.sin(impactProgress * Math.PI); // Ease in/out effect
-
-			// Calculate the new x position with kick offset based on `originalX`
+			const easedImpactProgress = Math.sin(impactProgress * Math.PI);
 			slotRenderData[targetSlotIndex].x =
 				slotRenderData[targetSlotIndex].originalX + kickOffset * easedImpactProgress;
-
-			// Apply white flash effect based on impact progress
-			slotRenderData[targetSlotIndex].whiteFlash = 0.9 * (1 - impactProgress); // 90% white at the start, fades to 0%
-
-			// Reset impact animation after completion
+			slotRenderData[targetSlotIndex].whiteFlash = 0.9 * (1 - impactProgress);
 			if (impactProgress >= 1) {
 				slotRenderData[targetSlotIndex].x = slotRenderData[targetSlotIndex].originalX;
-				slotRenderData[targetSlotIndex].whiteFlash = 0; // Remove flash effect
+				slotRenderData[targetSlotIndex].whiteFlash = 0;
 				impactStartTime = null;
 			}
 		}
 
 		drawSpells = drawSpells.filter(spell => spell.draw);
 		drawScene(game, slotRenderData, gl, shaderProgram, textures, drawSpells);
-
 		requestAnimationFrame(animate);
 	}
 
-	// Handle 'Q', 'W', 'E', 'R', 'D', 'F' keydown event to cast fireball
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toUpperCase();
 		if (keyToSlotIndex[key] !== undefined) {
@@ -180,7 +143,6 @@
 		}
 	}
 
-	// Set up and tear down
 	onMount(() => {
 		startMatch(game);
 		game.activeCreature = game.slots[1].creature;
