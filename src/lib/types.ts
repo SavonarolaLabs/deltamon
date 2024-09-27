@@ -84,7 +84,6 @@ export type AbilityFolder = {
 };
 
 export type DrawSpell = {
-	// animate
 	currentFrame: number;
 	duration: number;
 	startTime?: number;
@@ -94,7 +93,6 @@ export type DrawSpell = {
 	endX: number;
 	endY: number;
 
-	// render
 	abilityFolder: AbilityFolder;
 	texturePath: string;
 	x: number;
@@ -102,9 +100,9 @@ export type DrawSpell = {
 	z: number;
 	scale: number;
 	draw: boolean;
+	angle?: number; // New property
 };
 
-// Slot rendering data
 export type SlotRenderData = {
 	slotIndex: number;
 	playerId: number;
@@ -116,7 +114,8 @@ export type SlotRenderData = {
 	scale: number;
 	zIndex: number;
 	isHovered: boolean;
-	whiteFlash?: number; // Percentage of white overlay (0-1)
+	whiteFlash?: number;
+	angle?: number; // New property
 };
 
 export type TextureMetadata = {

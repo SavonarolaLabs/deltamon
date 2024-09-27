@@ -6,6 +6,10 @@ const FLAME2_DURATION = 200; // Duration in ms for flame2
 
 // Create flame10 (fireball) spell
 export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRenderData): DrawSpell {
+	const dx = targetSlot.x - sourceSlot.x;
+	const dy = targetSlot.y - sourceSlot.y;
+	const angle = Math.atan2(dy, dx);
+
 	return {
 		currentFrame: 0,
 		duration: FLAME10_DURATION,
@@ -21,6 +25,7 @@ export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRender
 		scale: 0.5,
 		draw: true,
 		z: 1,
+		angle, // Set calculated angle
 	};
 }
 
@@ -33,6 +38,7 @@ export function createFlame2(targetSlot: SlotRenderData): DrawSpell {
 		startX: targetSlot.x,
 		startY: targetSlot.y,
 		endX: targetSlot.x,
+		endY: targetSlot.y,
 		abilityFolder: abilityFolders.find(a => a.name == 'flame2')!,
 		texturePath: `/abilities/flame2/0000.png`,
 		x: targetSlot.x,
