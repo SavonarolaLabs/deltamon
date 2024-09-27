@@ -20,8 +20,8 @@
 	let drawSpells: DrawSpell[] = [];
 	let slotRenderData: SlotRenderData[] = [];
 
-	const targetSlotIndex = 6; // Target index for the impact animation
 	const activeSlotIndex = 1; // Active slot index for movement
+	let targetSlotIndex = 6;
 	let impactStartTime: number | null = null;
 	const impactDuration = 300; // Duration for the impact effect in ms
 	const kickOffset = 0.02; // Kick distance
@@ -30,6 +30,16 @@
 	let activeSlotMoveStartTime: number | null = null;
 	const activeSlotMoveDuration = 200; // Duration for the active slot move in ms
 	const activeSlotMoveOffset = -0.01; // Distance to move left
+
+	// Key-to-slot mapping
+	const keyToSlotIndex = {
+		Q: 6,
+		W: 7,
+		E: 8,
+		A: 9,
+		S: 10,
+		D: 11,
+	};
 
 	// Initialize WebGL and textures
 	async function initialize() {
@@ -56,9 +66,15 @@
 	}
 
 	// Add new fireball spell
-	function castFireball() {
+	function castFireball(targetIndex: number) {
+		targetSlotIndex = targetIndex;
+
+		// Get the source and target slot render data
+		const sourceSlot = slotRenderData[activeSlotIndex];
+		const targetSlot = slotRenderData[targetSlotIndex];
+
 		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
-		const flame10 = createFlame10();
+		const flame10 = createFlame10(sourceSlot, targetSlot);
 		drawSpells.push(flame10);
 
 		// Start movement for the active slot
@@ -66,7 +82,7 @@
 
 		playAudioAfterDelay('/mp3/Beating Punch.mp3', 350);
 		setTimeout(() => {
-			const flame2 = createFlame2(flame10);
+			const flame2 = createFlame2(targetSlot);
 			drawSpells.push(flame2);
 
 			// Set the start time for the impact effect
@@ -89,8 +105,8 @@
 				if (progress > 0.3) {
 					const moveProgress = (progress - 0.3) / 0.7;
 					spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
+					spell.y = spell.startY + (spell.endY - spell.startY) * moveProgress; // Interpolate y position
 				}
-				spell.y = spell.startY;
 			}
 
 			if (progress >= 1) spell.draw = false;
@@ -156,9 +172,12 @@
 		requestAnimationFrame(animate);
 	}
 
-	// Handle 'Q' keydown event to cast fireball
+	// Handle 'Q', 'W', 'E', 'R', 'D', 'F' keydown event to cast fireball
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key.toUpperCase() === 'Q') castFireball();
+		const key = event.key.toUpperCase();
+		if (keyToSlotIndex[key] !== undefined) {
+			castFireball(keyToSlotIndex[key]);
+		}
 	}
 
 	// Set up and tear down

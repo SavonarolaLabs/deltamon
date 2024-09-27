@@ -87,11 +87,12 @@ export type DrawSpell = {
 	// animate
 	currentFrame: number;
 	duration: number;
-	startTime: number;
+	startTime?: number;
 	lastTime: number;
 	startX: number;
 	startY: number;
 	endX: number;
+	endY: number;
 
 	// render
 	abilityFolder: AbilityFolder;
