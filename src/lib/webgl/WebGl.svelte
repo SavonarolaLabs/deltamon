@@ -50,7 +50,21 @@
 			if (slotRenderData[activeSlotIndex]) {
 				slotRenderData[activeSlotIndex].zIndex = 1;
 			}
+
+			handleResize();
+
 			animationFrameId = requestAnimationFrame(animate);
+		}
+	}
+
+	function handleResize() {
+		if (canvas && gl) {
+			const dpr = window.devicePixelRatio || 1;
+			canvas.width = window.innerWidth * dpr;
+			canvas.height = window.innerHeight * dpr;
+			canvas.style.width = window.innerWidth + 'px';
+			canvas.style.height = window.innerHeight + 'px';
+			gl.viewport(0, 0, canvas.width, canvas.height);
 		}
 	}
 
@@ -65,11 +79,16 @@
 		targetSlotIndex = targetIndex;
 		const sourceSlot = slotRenderData[activeSlotIndex];
 		const targetSlot = slotRenderData[targetSlotIndex];
+
+		// Calculate aspect ratio
+		const aspectRatio = canvas.width / canvas.height;
+
 		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
-		const flame10 = createFlame10(sourceSlot, targetSlot);
+		const flame10 = createFlame10(sourceSlot, targetSlot, aspectRatio);
 		drawSpells.push(flame10);
 		activeSlotMoveStartTime = performance.now();
 		playAudioAfterDelay('/mp3/Beating Punch.mp3', 350);
+
 		setTimeout(() => {
 			const flame2 = createFlame2(targetSlot);
 			drawSpells.push(flame2);
@@ -170,6 +189,7 @@
 		game.activeCreature = game.slots[1].creature;
 		initialize();
 		window.addEventListener('keydown', handleKeydown);
+		window.addEventListener('resize', handleResize);
 	});
 
 	onDestroy(() => {
@@ -181,6 +201,7 @@
 			gl.deleteBuffer(buffers.textureCoordBuffer);
 		}
 		window.removeEventListener('keydown', handleKeydown);
+		window.removeEventListener('resize', handleResize);
 	});
 </script>
 
@@ -188,8 +209,6 @@
 
 <style>
 	canvas {
-		width: 100%;
-		height: 100vh;
 		display: block;
 	}
 </style>
