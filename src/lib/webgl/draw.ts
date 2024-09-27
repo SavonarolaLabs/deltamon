@@ -34,53 +34,38 @@ export function drawScene(
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
+	const whiteFlashUniform = gl.getUniformLocation(shaderProgram, 'uWhiteFlash')!;
 	const backgroundMetadata = textures['/bg/current.png'];
 	if (backgroundMetadata) {
 		drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundMetadata);
 	}
 
-	const sortedSlots = slotRenderData.slice().sort((a, b) => a.zIndex - b.zIndex);
+	const allElements = [
+		...slotRenderData.map(slot => ({ ...slot, type: 'slot' })),
+		...drawSpells.filter(spell => spell.draw).map(spell => ({ ...spell, type: 'spell' })),
+	].sort((a, b) => (a.zIndex || a.z) ?? 0 - (b.zIndex || b.z) ?? 0);
 
-	sortedSlots.forEach(slot => {
-		const textureMetadata = textures[slot.texturePath];
+	for (const element of allElements) {
+		const textureMetadata = textures[element.texturePath];
 		if (textureMetadata) {
+			const { x, y, scale, whiteFlash = 0, angle = 0 } = element;
 			drawElement(
 				gl,
 				shaderProgram,
 				positionBuffer,
 				textureCoordBuffer,
 				textureMetadata,
-				slot.x,
-				slot.y,
-				slot.scale,
+				x,
+				y,
+				scale,
 				positionAttribute,
 				textureCoordAttribute,
-				slot.whiteFlash
+				whiteFlash,
+				angle,
+				whiteFlashUniform
 			);
 		} else {
-			console.warn(`Texture not found for path: ${slot.texturePath}`);
-		}
-	});
-
-	for (let spell of drawSpells.sort((a, b) => a.z - b.z)) {
-		if (spell.draw) {
-			const frameMetadata = textures[spell.texturePath];
-			if (frameMetadata) {
-				drawElement(
-					gl,
-					shaderProgram,
-					positionBuffer,
-					textureCoordBuffer,
-					frameMetadata,
-					spell.x,
-					spell.y,
-					spell.scale,
-					positionAttribute,
-					textureCoordAttribute
-				);
-			} else {
-				console.warn(`${spell.texturePath} not in textures[].`);
-			}
+			console.warn(`Texture not found for path: ${element.texturePath}`);
 		}
 	}
 }
@@ -97,14 +82,14 @@ function drawElement(
 	positionAttribute: number,
 	textureCoordAttribute: number,
 	whiteFlash: number = 0,
-	angle: number = 0
+	angle: number = 0,
+	whiteFlashUniform: WebGLUniformLocation
 ) {
 	const { scaleX, scaleY } = calculateScaling(gl, scale, textureMetadata.aspectRatio);
 
 	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute, angle);
 	bindTextureAndCoords(gl, textureMetadata.texture, textureCoordBuffer, textureCoordAttribute);
 
-	const whiteFlashUniform = gl.getUniformLocation(shaderProgram, 'uWhiteFlash');
 	gl.uniform1f(whiteFlashUniform, whiteFlash);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -140,7 +125,6 @@ function setPositionBuffer(
 	const cos = Math.cos(angle);
 	const sin = Math.sin(angle);
 
-	// Calculate the rotated vertices without dividing scale
 	const positions = new Float32Array([
 		-scaleX * cos - scaleY * sin + x,
 		-scaleX * sin + scaleY * cos + y, // Top-left
