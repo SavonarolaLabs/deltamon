@@ -2,7 +2,7 @@ import { abilityFolders } from './abilityFolders';
 import type { DrawSpell, SlotRenderData } from '$lib/types';
 
 const FLAME10_DURATION = 600; // Duration in ms for flame10
-const FLAME2_DURATION = 200; // Duration in ms for flame2
+const FLAME2_DURATION = 300; // Duration in ms for flame2
 
 // Create flame10 (fireball) spell
 export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRenderData): DrawSpell {

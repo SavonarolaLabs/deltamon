@@ -84,11 +84,12 @@
 		const sourceSlot = slotRenderData[activeSlotIndex];
 		const targetSlot = slotRenderData[targetIndex];
 
-		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
+		playAudio('/mp3/fireball.mp3', 1, 0.0);
 		const flame10 = createFlame10(sourceSlot, targetSlot);
 		drawSpells.push(flame10);
 		activeSlotMoveStartTime = performance.now();
-		playAudioAfterDelay('/mp3/Beating Punch.mp3', 350);
+		//playAudioAfterDelay('/mp3/explosion.mp3', 350, 2);
+		playAudioAfterDelay('/mp3/blast.mp3', 350, 1.1);
 
 		setTimeout(() => {
 			const flame2 = createFlame2(targetSlot);

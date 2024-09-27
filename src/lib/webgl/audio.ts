@@ -1,5 +1,5 @@
 let config = {
-	mute: true,
+	mute: false,
 };
 
 export function playAudio(src: string, playbackRate: number = 1, startTime: number = 0) {
@@ -12,12 +12,13 @@ export function playAudio(src: string, playbackRate: number = 1, startTime: numb
 	audio.play();
 }
 
-export function playAudioAfterDelay(src: string, delay: number) {
+export function playAudioAfterDelay(src: string, delay: number, playbackRate: number = 1, startTime: number = 0) {
 	if (config.mute) {
 		return;
 	}
 	setTimeout(() => {
 		const audio = new Audio(src);
+		audio.playbackRate = playbackRate;
 		audio.play();
 	}, delay);
 }
