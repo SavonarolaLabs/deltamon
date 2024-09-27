@@ -57,7 +57,7 @@ export function drawScene(
 				positionAttribute,
 				textureCoordAttribute,
 				whiteFlash,
-				i > 5 ? -Math.PI / 2 : 0,
+				angle,
 				whiteFlashUniform
 			);
 		} else {
@@ -86,36 +86,49 @@ function drawElement(
 	const imageWidth = textureMetadata.width;
 	const imageHeight = textureMetadata.height;
 
-	// Use canvas and image aspect ratios
+	// Compute aspect ratios
 	const canvasAspectRatio = canvasWidth / canvasHeight;
 	const imageAspectRatio = imageWidth / imageHeight;
 
-	let scaleX, scaleY;
-
-	// Match scaling for aspect ratio
-	if (canvasAspectRatio > imageAspectRatio) {
-		scaleX = scale / canvasAspectRatio;
-		scaleY = scale / imageAspectRatio;
-	} else {
-		scaleX = scale;
-		scaleY = scale * imageAspectRatio;
-	}
+	// Adjust scale for image aspect ratio
+	let scaleX = scale * imageAspectRatio;
+	let scaleY = scale;
 
 	// Compute rotation
 	const cos = Math.cos(angle);
 	const sin = Math.sin(angle);
 
-	// Define positions for vertices after scaling and rotation
-	const positions = new Float32Array([
-		-scaleX * cos - scaleY * sin + x,
-		-scaleX * sin + scaleY * cos + y, // Top-left
-		-scaleX * cos + scaleY * sin + x,
-		-scaleX * sin - scaleY * cos + y, // Bottom-left
-		scaleX * cos - scaleY * sin + x,
-		scaleX * sin + scaleY * cos + y, // Top-right
-		scaleX * cos + scaleY * sin + x,
-		scaleX * sin - scaleY * cos + y, // Bottom-right
+	// Define positions for vertices before rotation
+	let positions = new Float32Array([
+		-scaleX,
+		-scaleY, // Bottom-left
+		scaleX,
+		-scaleY, // Bottom-right
+		-scaleX,
+		scaleY, // Top-left
+		scaleX,
+		scaleY, // Top-right
 	]);
+
+	// Apply rotation to each vertex
+	for (let i = 0; i < positions.length; i += 2) {
+		const x0 = positions[i];
+		const y0 = positions[i + 1];
+		positions[i] = x0 * cos - y0 * sin;
+		positions[i + 1] = x0 * sin + y0 * cos;
+	}
+
+	// Adjust x positions to account for canvas aspect ratio
+	const aspectCorrection = canvasHeight / canvasWidth;
+	for (let i = 0; i < positions.length; i += 2) {
+		positions[i] *= aspectCorrection;
+	}
+
+	// Apply translation
+	for (let i = 0; i < positions.length; i += 2) {
+		positions[i] += x;
+		positions[i + 1] += y;
+	}
 
 	// Use the pre-initialized position buffer and set vertex positions
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -126,7 +139,16 @@ function drawElement(
 	// Bind texture and use the pre-initialized texture coordinate buffer
 	gl.bindTexture(gl.TEXTURE_2D, textureMetadata.texture);
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-	const textureCoords = new Float32Array([0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]);
+	const textureCoords = new Float32Array([
+		0.0,
+		1.0, // Bottom-left
+		1.0,
+		1.0, // Bottom-right
+		0.0,
+		0.0, // Top-left
+		1.0,
+		0.0, // Top-right
+	]);
 	gl.bufferData(gl.ARRAY_BUFFER, textureCoords, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(textureCoordAttribute);

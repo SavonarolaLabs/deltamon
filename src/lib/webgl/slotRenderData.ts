@@ -32,8 +32,8 @@ export function initializeSlotRenderData(game: GameState): SlotRenderData[] {
 			texturePath,
 			x,
 			y,
-			scale: 0.21, // default scale, adjust as needed
-			zIndex: 0, // default z-index
+			scale: 0.29,
+			zIndex: 0,
 			isHovered: false,
 			originalX: x,
 			originalY: y,
