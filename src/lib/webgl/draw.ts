@@ -42,7 +42,14 @@ export function drawScene(
 	// Draw background
 	const backgroundMetadata = textures['/bg/current.png'];
 	if (backgroundMetadata) {
-		drawBackground(gl, shaderProgram, positionBuffer, textureCoordBuffer, backgroundMetadata);
+		drawBackground(
+			gl,
+			shaderProgram,
+			positionBuffer,
+			textureCoordBuffer,
+			backgroundMetadata,
+			whiteFlashUniform // Pass the uniform location here
+		);
 	}
 
 	// Collect all elements to draw

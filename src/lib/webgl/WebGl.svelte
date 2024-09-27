@@ -21,9 +21,14 @@
 	let slotRenderData: SlotRenderData[] = [];
 	let animationFrameId: number;
 
+	interface ImpactAnimation {
+		targetSlotIndex: number;
+		startTime: number;
+	}
+
+	let impactAnimations: ImpactAnimation[] = [];
+
 	const activeSlotIndex = 1;
-	let targetSlotIndex = 6;
-	let impactStartTime: number | null = null;
 	const impactDuration = 300;
 	const kickOffset = 10; // Adjust based on pixel coordinates
 
@@ -81,9 +86,8 @@
 	}
 
 	function castFireball(targetIndex: number) {
-		targetSlotIndex = targetIndex;
 		const sourceSlot = slotRenderData[activeSlotIndex];
-		const targetSlot = slotRenderData[targetSlotIndex];
+		const targetSlot = slotRenderData[targetIndex];
 
 		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
 		const flame10 = createFlame10(sourceSlot, targetSlot);
@@ -94,7 +98,12 @@
 		setTimeout(() => {
 			const flame2 = createFlame2(targetSlot);
 			drawSpells.push(flame2);
-			impactStartTime = performance.now();
+
+			// Start a new impact animation
+			impactAnimations.push({
+				targetSlotIndex: targetIndex,
+				startTime: performance.now(),
+			});
 		}, 500);
 	}
 
@@ -160,21 +169,29 @@
 	}
 
 	function updateImpactAnimation(time: number) {
-		if (impactStartTime && slotRenderData[targetSlotIndex]) {
-			const elapsedImpactTime = time - impactStartTime;
+		impactAnimations = impactAnimations.filter(impact => {
+			const { targetSlotIndex, startTime } = impact;
+			const slot = slotRenderData[targetSlotIndex];
+
+			if (!slot) {
+				return false; // Remove impact if slot doesn't exist
+			}
+
+			const elapsedImpactTime = time - startTime;
 			const impactProgress = Math.min(elapsedImpactTime / impactDuration, 1);
 			const easedImpactProgress = Math.sin(impactProgress * Math.PI);
 
-			slotRenderData[targetSlotIndex].x =
-				slotRenderData[targetSlotIndex].originalX + kickOffset * easedImpactProgress;
-			slotRenderData[targetSlotIndex].whiteFlash = 0.9 * (1 - impactProgress);
+			slot.x = slot.originalX + kickOffset * easedImpactProgress;
+			slot.whiteFlash = 0.9 * (1 - impactProgress);
 
 			if (impactProgress >= 1) {
-				slotRenderData[targetSlotIndex].x = slotRenderData[targetSlotIndex].originalX;
-				slotRenderData[targetSlotIndex].whiteFlash = 0;
-				impactStartTime = null;
+				slot.x = slot.originalX;
+				slot.whiteFlash = 0;
+				return false; // Remove impact animation from the array
 			}
-		}
+
+			return true; // Keep the impact animation in the array
+		});
 	}
 
 	function handleKeydown(event: KeyboardEvent) {

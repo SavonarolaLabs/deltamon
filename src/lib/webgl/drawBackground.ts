@@ -5,7 +5,8 @@ export function drawBackground(
 	shaderProgram: WebGLProgram,
 	positionBuffer: WebGLBuffer,
 	textureCoordBuffer: WebGLBuffer,
-	backgroundMetadata: TextureMetadata
+	backgroundMetadata: TextureMetadata,
+	whiteFlashUniform: WebGLUniformLocation // Pass the uniform location as a parameter
 ) {
 	// Define positions to cover the entire canvas
 	const positions = new Float32Array([
@@ -47,6 +48,9 @@ export function drawBackground(
 
 	const samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler');
 	gl.uniform1i(samplerUniform, 0);
+
+	// Set whiteFlash uniform to 0 for the background
+	gl.uniform1f(whiteFlashUniform, 0.0);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
