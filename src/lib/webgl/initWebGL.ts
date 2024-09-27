@@ -31,8 +31,5 @@ export function initWebGL(canvas: HTMLCanvasElement): WebGLInitResult | null {
 	// Set clear color
 	gl.clearColor(0.0, 0.0, 0.0, 1.0); // Black background
 
-	// Note: Remove texture parameter settings from here
-	// Move them to where you bind and set up your textures
-
 	return { gl, shaderProgram, buffers };
 }

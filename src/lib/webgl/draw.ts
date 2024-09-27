@@ -1,6 +1,7 @@
 import type { DrawSpell, GameState, SlotRenderData, TextureMetadataMap, TextureMetadata } from '$lib/types';
 import { initBuffers } from './buffers';
 import { mat4 } from 'gl-matrix';
+import { drawBackground } from './drawBackground';
 
 let positionBuffer: WebGLBuffer;
 let textureCoordBuffer: WebGLBuffer;
@@ -32,10 +33,10 @@ export function drawScene(
 ) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
-	// Compute and set the projection matrix
-	const aspectRatio = gl.canvas.width / gl.canvas.height;
+	// Create and set the projection matrix
 	const projectionMatrix = mat4.create();
-	mat4.ortho(projectionMatrix, -aspectRatio, aspectRatio, -1, 1, -1, 1);
+	mat4.ortho(projectionMatrix, 0, gl.canvas.width, gl.canvas.height, 0, -1, 1);
+
 	gl.uniformMatrix4fv(projectionMatrixUniform, false, projectionMatrix);
 
 	// Draw background
@@ -90,40 +91,43 @@ function drawElement(
 	angle: number = 0,
 	whiteFlashUniform: WebGLUniformLocation
 ) {
-	const imageAspectRatio = textureMetadata.width / textureMetadata.height;
-
-	// Adjust scale for image aspect ratio
-	const scaleX = scale * imageAspectRatio;
-	const scaleY = scale;
+	const { width: imageWidth, height: imageHeight } = textureMetadata;
 
 	// Define positions for vertices before rotation
 	let positions = new Float32Array([
-		-scaleX,
-		-scaleY, // Bottom-left
-		scaleX,
-		-scaleY, // Bottom-right
-		-scaleX,
-		scaleY, // Top-left
-		scaleX,
-		scaleY, // Top-right
+		0,
+		0, // Top-left
+		0,
+		imageHeight, // Bottom-left
+		imageWidth,
+		0, // Top-right
+		imageWidth,
+		imageHeight, // Bottom-right
 	]);
 
-	// Compute rotation
+	// Compute rotation around the center of the image
+	const centerX = imageWidth / 2;
+	const centerY = imageHeight / 2;
 	const cos = Math.cos(angle);
 	const sin = Math.sin(angle);
 
-	// Apply rotation to each vertex
+	// Apply scaling, rotation, and translation to each vertex
 	for (let i = 0; i < positions.length; i += 2) {
-		const x0 = positions[i];
-		const y0 = positions[i + 1];
-		positions[i] = x0 * cos - y0 * sin;
-		positions[i + 1] = x0 * sin + y0 * cos;
-	}
+		// Translate vertices to center at (0, 0)
+		let x0 = positions[i] - centerX;
+		let y0 = positions[i + 1] - centerY;
 
-	// Apply translation
-	for (let i = 0; i < positions.length; i += 2) {
-		positions[i] += x;
-		positions[i + 1] += y;
+		// Apply scaling
+		x0 *= scale;
+		y0 *= scale;
+
+		// Apply rotation
+		const xRotated = x0 * cos - y0 * sin;
+		const yRotated = x0 * sin + y0 * cos;
+
+		// Translate back and apply position
+		positions[i] = xRotated + x;
+		positions[i + 1] = yRotated + y;
 	}
 
 	// Set vertex positions
@@ -137,13 +141,13 @@ function drawElement(
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 	const textureCoords = new Float32Array([
 		0.0,
+		0.0, // Top-left
+		0.0,
 		1.0, // Bottom-left
 		1.0,
-		1.0, // Bottom-right
-		0.0,
-		0.0, // Top-left
-		1.0,
 		0.0, // Top-right
+		1.0,
+		1.0, // Bottom-right
 	]);
 	gl.bufferData(gl.ARRAY_BUFFER, textureCoords, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
@@ -155,6 +159,3 @@ function drawElement(
 	// Draw the element
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
-
-// Updated drawBackground function
-import { drawBackground } from './drawBackground';

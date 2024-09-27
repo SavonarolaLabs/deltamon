@@ -1,32 +1,32 @@
 export function initShaders(gl: WebGLRenderingContext): WebGLProgram {
 	const vertexShaderSource = `
-		attribute vec2 aVertexPosition;
-		attribute vec2 aTextureCoord;
+attribute vec2 aVertexPosition;
+attribute vec2 aTextureCoord;
 
-		uniform mat4 uProjectionMatrix;
+uniform mat4 uProjectionMatrix;
 
-		varying highp vec2 vTextureCoord;
+varying highp vec2 vTextureCoord;
 
-		void main(void) {
-			gl_Position = uProjectionMatrix * vec4(aVertexPosition, 0.0, 1.0);
-			vTextureCoord = aTextureCoord;
-		}
-    `;
+void main(void) {
+    gl_Position = uProjectionMatrix * vec4(aVertexPosition, 0.0, 1.0);
+    vTextureCoord = aTextureCoord;
+}
+	`;
 
 	const fragmentShaderSource = `
-        varying highp vec2 vTextureCoord;
-        uniform sampler2D uSampler;
-        uniform highp float uWhiteFlash; // New uniform for white flash effect
+		varying highp vec2 vTextureCoord;
+		uniform sampler2D uSampler;
+		uniform highp float uWhiteFlash; // Uniform for white flash effect
 
-        void main(void) {
-            // Sample the texture color
-            highp vec4 texColor = texture2D(uSampler, vTextureCoord);
+		void main(void) {
+			// Sample the texture color
+			highp vec4 texColor = texture2D(uSampler, vTextureCoord);
 
-            // Blend texture color with white based on uWhiteFlash value
-            highp vec4 whiteColor = vec4(1.0, 1.0, 1.0, texColor.a);
-            gl_FragColor = mix(texColor, whiteColor, uWhiteFlash);
-        }
-    `;
+			// Blend texture color with white based on uWhiteFlash value
+			highp vec4 whiteColor = vec4(1.0, 1.0, 1.0, texColor.a);
+			gl_FragColor = mix(texColor, whiteColor, uWhiteFlash);
+		}
+	`;
 
 	const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
 	const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);

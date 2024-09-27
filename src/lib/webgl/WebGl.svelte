@@ -25,11 +25,11 @@
 	let targetSlotIndex = 6;
 	let impactStartTime: number | null = null;
 	const impactDuration = 300;
-	const kickOffset = 0.02;
+	const kickOffset = 10; // Adjust based on pixel coordinates
 
 	let activeSlotMoveStartTime: number | null = null;
 	const activeSlotMoveDuration = 200;
-	const activeSlotMoveOffset = -0.01;
+	const activeSlotMoveOffset = -5; // Adjust based on pixel coordinates
 
 	const keyToSlotIndex = {
 		Q: 6,
@@ -46,12 +46,9 @@
 			({ gl, shaderProgram, buffers } = result);
 			textures = await loadAllTextures(gl);
 			initDrawScene(gl, shaderProgram);
-			slotRenderData = initializeSlotRenderData(game);
+			slotRenderData = initializeSlotRenderData(game, gl);
 			if (slotRenderData[activeSlotIndex]) {
 				slotRenderData[activeSlotIndex].zIndex = 1;
-			}
-			if (slotRenderData[3]) {
-				slotRenderData[3].angle = -Math.PI / 2;
 			}
 
 			handleResize();
@@ -63,11 +60,16 @@
 	function handleResize() {
 		if (canvas && gl) {
 			const dpr = window.devicePixelRatio || 1;
-			canvas.width = window.innerWidth * dpr;
-			canvas.height = window.innerHeight * dpr;
-			canvas.style.width = window.innerWidth + 'px';
-			canvas.style.height = window.innerHeight + 'px';
+			const width = window.innerWidth;
+			const height = window.innerHeight;
+			canvas.width = width * dpr;
+			canvas.height = height * dpr;
+			canvas.style.width = `${width}px`;
+			canvas.style.height = `${height}px`;
 			gl.viewport(0, 0, canvas.width, canvas.height);
+
+			// Recalculate slot positions based on new canvas size
+			slotRenderData = initializeSlotRenderData(game, gl);
 		}
 	}
 

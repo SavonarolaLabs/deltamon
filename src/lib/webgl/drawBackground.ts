@@ -7,16 +7,16 @@ export function drawBackground(
 	textureCoordBuffer: WebGLBuffer,
 	backgroundMetadata: TextureMetadata
 ) {
-	// Define positions to cover the entire screen
+	// Define positions to cover the entire canvas
 	const positions = new Float32Array([
-		-1.0,
-		1.0, // Top-left
-		-1.0,
-		-1.0, // Bottom-left
-		1.0,
-		1.0, // Top-right
-		1.0,
-		-1.0, // Bottom-right
+		0,
+		0, // Top-left
+		0,
+		gl.canvas.height, // Bottom-left
+		gl.canvas.width,
+		0, // Top-right
+		gl.canvas.width,
+		gl.canvas.height, // Bottom-right
 	]);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -31,13 +31,13 @@ export function drawBackground(
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 	const textureCoords = new Float32Array([
 		0.0,
-		1.0, // Top-left
+		0.0, // Top-left
 		0.0,
-		0.0, // Bottom-left
+		1.0, // Bottom-left
 		1.0,
-		1.0, // Top-right
+		0.0, // Top-right
 		1.0,
-		0.0, // Bottom-right
+		1.0, // Bottom-right
 	]);
 	gl.bufferData(gl.ARRAY_BUFFER, textureCoords, gl.STATIC_DRAW);
 
