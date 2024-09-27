@@ -14,7 +14,7 @@ export function applyHoverAnimation(slot: SlotRenderData, time: number): SlotRen
 
 	return {
 		...slot,
-		scale: 0.24,
+		scale: 0.34,
 		y: slot.y - hoverOffset / 2, // Apply vertical oscillation to the `y` position
 	};
 }
