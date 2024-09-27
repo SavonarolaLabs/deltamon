@@ -96,10 +96,12 @@ function drawElement(
 	scale: number,
 	positionAttribute: number,
 	textureCoordAttribute: number,
-	whiteFlash: number = 0
+	whiteFlash: number = 0,
+	angle: number = 0
 ) {
 	const { scaleX, scaleY } = calculateScaling(gl, scale, textureMetadata.aspectRatio);
-	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute);
+
+	setPositionBuffer(gl, positionBuffer, x, y, scaleX, scaleY, positionAttribute, angle);
 	bindTextureAndCoords(gl, textureMetadata.texture, textureCoordBuffer, textureCoordAttribute);
 
 	const whiteFlashUniform = gl.getUniformLocation(shaderProgram, 'uWhiteFlash');
@@ -130,19 +132,26 @@ function setPositionBuffer(
 	y: number,
 	scaleX: number,
 	scaleY: number,
-	positionAttribute: number
+	positionAttribute: number,
+	angle: number = 0
 ) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+	const cos = Math.cos(angle);
+	const sin = Math.sin(angle);
+
+	// Calculate the rotated vertices without dividing scale
 	const positions = new Float32Array([
-		-scaleX + x,
-		scaleY + y,
-		-scaleX + x,
-		-scaleY + y,
-		scaleX + x,
-		scaleY + y,
-		scaleX + x,
-		-scaleY + y,
+		-scaleX * cos - scaleY * sin + x,
+		-scaleX * sin + scaleY * cos + y, // Top-left
+		-scaleX * cos + scaleY * sin + x,
+		-scaleX * sin - scaleY * cos + y, // Bottom-left
+		scaleX * cos - scaleY * sin + x,
+		scaleX * sin + scaleY * cos + y, // Top-right
+		scaleX * cos + scaleY * sin + x,
+		scaleX * sin - scaleY * cos + y, // Bottom-right
 	]);
+
 	gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(positionAttribute, 2, gl.FLOAT, false, 0, 0);
 }
