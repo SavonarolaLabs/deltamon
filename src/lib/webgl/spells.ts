@@ -5,17 +5,9 @@ const FLAME10_DURATION = 500; // Duration in ms for flame10
 const FLAME2_DURATION = 200; // Duration in ms for flame2
 
 // Create flame10 (fireball) spell
-export function createFlame10(
-	sourceSlot: SlotRenderData,
-	targetSlot: SlotRenderData,
-	aspectRatio: number // Pass the aspect ratio
-): DrawSpell {
-	// Adjust the y-coordinates based on the aspect ratio
-	const adjustedSourceY = sourceSlot.y * aspectRatio;
-	const adjustedTargetY = targetSlot.y * aspectRatio;
-
+export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRenderData): DrawSpell {
 	const dx = targetSlot.x - sourceSlot.x;
-	const dy = adjustedTargetY - adjustedSourceY;
+	const dy = targetSlot.y - sourceSlot.y;
 	const angle = Math.atan2(dy, dx);
 
 	return {

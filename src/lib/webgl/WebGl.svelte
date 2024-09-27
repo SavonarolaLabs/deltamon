@@ -50,6 +50,9 @@
 			if (slotRenderData[activeSlotIndex]) {
 				slotRenderData[activeSlotIndex].zIndex = 1;
 			}
+			if (slotRenderData[3]) {
+				slotRenderData[3].angle = -Math.PI / 2;
+			}
 
 			handleResize();
 
@@ -80,11 +83,8 @@
 		const sourceSlot = slotRenderData[activeSlotIndex];
 		const targetSlot = slotRenderData[targetSlotIndex];
 
-		// Calculate aspect ratio
-		const aspectRatio = canvas.width / canvas.height;
-
 		playAudio('/mp3/hadouken.mp3', 1.1, 0.3);
-		const flame10 = createFlame10(sourceSlot, targetSlot, aspectRatio);
+		const flame10 = createFlame10(sourceSlot, targetSlot);
 		drawSpells.push(flame10);
 		activeSlotMoveStartTime = performance.now();
 		playAudioAfterDelay('/mp3/Beating Punch.mp3', 350);
@@ -190,6 +190,7 @@
 		initialize();
 		window.addEventListener('keydown', handleKeydown);
 		window.addEventListener('resize', handleResize);
+		handleResize(); // Ensure initial canvas size is set
 	});
 
 	onDestroy(() => {

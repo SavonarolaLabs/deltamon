@@ -7,33 +7,20 @@ export function drawBackground(
 	textureCoordBuffer: WebGLBuffer,
 	backgroundMetadata: TextureMetadata
 ) {
-	const canvasWidth = gl.canvas.width;
-	const canvasHeight = gl.canvas.height;
-	const imageWidth = backgroundMetadata.width;
-	const imageHeight = backgroundMetadata.height;
-
-	const widthRatio = imageWidth / canvasWidth;
-	const heightRatio = imageHeight / canvasHeight;
-
-	let width, height;
-
-	if (widthRatio < heightRatio) {
-		width = 2.0;
-		height = (heightRatio / widthRatio) * 2.0;
-	} else {
-		height = 2.0;
-		width = (widthRatio / heightRatio) * 2.0;
-	}
+	// Define positions to cover the entire screen
+	const positions = new Float32Array([
+		-1.0,
+		1.0, // Top-left
+		-1.0,
+		-1.0, // Bottom-left
+		1.0,
+		1.0, // Top-right
+		1.0,
+		-1.0, // Bottom-right
+	]);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	//prettier-ignore
-	const modifiedPositions = new Float32Array([
-		-width / 2, height / 2,
-		-width / 2, -height / 2,
-		width / 2, height / 2,
-		width / 2, -height / 2,
-	]);
-	gl.bufferData(gl.ARRAY_BUFFER, modifiedPositions, gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 
 	const positionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
 	gl.enableVertexAttribArray(positionAttribute);
@@ -42,6 +29,18 @@ export function drawBackground(
 	gl.bindTexture(gl.TEXTURE_2D, backgroundMetadata.texture);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+	const textureCoords = new Float32Array([
+		0.0,
+		1.0, // Top-left
+		0.0,
+		0.0, // Bottom-left
+		1.0,
+		1.0, // Top-right
+		1.0,
+		0.0, // Bottom-right
+	]);
+	gl.bufferData(gl.ARRAY_BUFFER, textureCoords, gl.STATIC_DRAW);
+
 	const textureCoordAttribute = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
 	gl.enableVertexAttribArray(textureCoordAttribute);
 	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);

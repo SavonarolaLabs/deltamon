@@ -1,28 +1,32 @@
 export function initShaders(gl: WebGLRenderingContext): WebGLProgram {
 	const vertexShaderSource = `
-		attribute vec4 aVertexPosition;
+		attribute vec2 aVertexPosition;
 		attribute vec2 aTextureCoord;
+
+		uniform mat4 uProjectionMatrix;
+
 		varying highp vec2 vTextureCoord;
+
 		void main(void) {
-			gl_Position = aVertexPosition;
+			gl_Position = uProjectionMatrix * vec4(aVertexPosition, 0.0, 1.0);
 			vTextureCoord = aTextureCoord;
 		}
-	`;
+    `;
 
 	const fragmentShaderSource = `
-		varying highp vec2 vTextureCoord;
-		uniform sampler2D uSampler;
-		uniform highp float uWhiteFlash; // New uniform for white flash effect
+        varying highp vec2 vTextureCoord;
+        uniform sampler2D uSampler;
+        uniform highp float uWhiteFlash; // New uniform for white flash effect
 
-		void main(void) {
-			// Sample the texture color
-			highp vec4 texColor = texture2D(uSampler, vTextureCoord);
+        void main(void) {
+            // Sample the texture color
+            highp vec4 texColor = texture2D(uSampler, vTextureCoord);
 
-			// Blend texture color with white based on uWhiteFlash value
-			highp vec4 whiteColor = vec4(1.0, 1.0, 1.0, texColor.a);
-			gl_FragColor = mix(texColor, whiteColor, uWhiteFlash);
-		}
-	`;
+            // Blend texture color with white based on uWhiteFlash value
+            highp vec4 whiteColor = vec4(1.0, 1.0, 1.0, texColor.a);
+            gl_FragColor = mix(texColor, whiteColor, uWhiteFlash);
+        }
+    `;
 
 	const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
 	const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
@@ -33,10 +37,7 @@ export function initShaders(gl: WebGLRenderingContext): WebGLProgram {
 	gl.linkProgram(shaderProgram);
 
 	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-		console.error(
-			'Unable to initialize the shader program:',
-			gl.getProgramInfoLog(shaderProgram)
-		);
+		console.error('Unable to initialize the shader program:', gl.getProgramInfoLog(shaderProgram));
 		return null;
 	}
 
@@ -44,11 +45,7 @@ export function initShaders(gl: WebGLRenderingContext): WebGLProgram {
 	return shaderProgram;
 }
 
-function compileShader(
-	gl: WebGLRenderingContext,
-	type: number,
-	source: string
-): WebGLShader | null {
+function compileShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
 	const shader = gl.createShader(type);
 	if (!shader) {
 		console.error('Unable to create shader');

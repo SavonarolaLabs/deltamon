@@ -16,10 +16,6 @@ export function initWebGL(canvas: HTMLCanvasElement): WebGLInitResult | null {
 		return null;
 	}
 
-	// Resize canvas to match display size
-	resizeCanvasToDisplaySize(canvas);
-	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
 	// Initialize shaders and buffers
 	const shaderProgram = initShaders(gl);
 	if (!shaderProgram) {
@@ -32,23 +28,11 @@ export function initWebGL(canvas: HTMLCanvasElement): WebGLInitResult | null {
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-	// Set clear color and clear the screen
+	// Set clear color
 	gl.clearColor(0.0, 0.0, 0.0, 1.0); // Black background
-	gl.clear(gl.COLOR_BUFFER_BIT);
 
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	// Note: Remove texture parameter settings from here
+	// Move them to where you bind and set up your textures
 
 	return { gl, shaderProgram, buffers };
-}
-
-function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement): void {
-	const { width, height } = canvas.getBoundingClientRect();
-	const dpr = window.devicePixelRatio || 1;
-	canvas.width = width * dpr;
-	canvas.height = height * dpr;
-	canvas.style.width = `${width}px`;
-	canvas.style.height = `${height}px`;
 }
