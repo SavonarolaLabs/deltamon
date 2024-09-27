@@ -30,11 +30,11 @@
 
 	const activeSlotIndex = 1;
 	const impactDuration = 300;
-	const kickOffset = 10; // Adjust based on pixel coordinates
+	const kickOffset = 60; // Adjust based on pixel coordinates
 
 	let activeSlotMoveStartTime: number | null = null;
 	const activeSlotMoveDuration = 200;
-	const activeSlotMoveOffset = -5; // Adjust based on pixel coordinates
+	const activeSlotMoveOffset = -20; // Adjust based on pixel coordinates
 
 	const keyToSlotIndex = {
 		Q: 6,
