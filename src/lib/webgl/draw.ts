@@ -39,7 +39,9 @@ export function drawScene(
 		...drawSpells.filter(spell => spell.draw).map(spell => ({ ...spell, type: 'spell' })),
 	].sort((a, b) => (a.zIndex ?? a.z) - (b.zIndex ?? b.z));
 
+	let i = 0;
 	for (const element of allElements) {
+		i++;
 		const textureMetadata = textures[element.texturePath];
 		if (textureMetadata) {
 			const { x, y, scale, whiteFlash = 0, angle = 0 } = element;
@@ -55,7 +57,7 @@ export function drawScene(
 				positionAttribute,
 				textureCoordAttribute,
 				whiteFlash,
-				angle,
+				i > 5 ? -Math.PI / 2 : 0,
 				whiteFlashUniform
 			);
 		} else {
@@ -84,18 +86,19 @@ function drawElement(
 	const imageWidth = textureMetadata.width;
 	const imageHeight = textureMetadata.height;
 
-	const widthRatio = imageWidth / canvasWidth;
-	const heightRatio = imageHeight / canvasHeight;
+	// Use canvas and image aspect ratios
+	const canvasAspectRatio = canvasWidth / canvasHeight;
+	const imageAspectRatio = imageWidth / imageHeight;
 
-	let adjustedScaleX, adjustedScaleY;
+	let scaleX, scaleY;
 
-	// Apply scale to match image aspect ratio and canvas size without over-scaling
-	if (widthRatio < heightRatio) {
-		adjustedScaleX = scale * (2.0 / canvasWidth) * imageWidth;
-		adjustedScaleY = scale * (2.0 / canvasHeight) * imageHeight;
+	// Match scaling for aspect ratio
+	if (canvasAspectRatio > imageAspectRatio) {
+		scaleX = scale / canvasAspectRatio;
+		scaleY = scale / imageAspectRatio;
 	} else {
-		adjustedScaleY = scale * (2.0 / canvasHeight) * imageHeight;
-		adjustedScaleX = scale * (2.0 / canvasWidth) * imageWidth;
+		scaleX = scale;
+		scaleY = scale * imageAspectRatio;
 	}
 
 	// Compute rotation
@@ -104,14 +107,14 @@ function drawElement(
 
 	// Define positions for vertices after scaling and rotation
 	const positions = new Float32Array([
-		-adjustedScaleX * cos - adjustedScaleY * sin + x,
-		-adjustedScaleX * sin + adjustedScaleY * cos + y, // Top-left
-		-adjustedScaleX * cos + adjustedScaleY * sin + x,
-		-adjustedScaleX * sin - adjustedScaleY * cos + y, // Bottom-left
-		adjustedScaleX * cos - adjustedScaleY * sin + x,
-		adjustedScaleX * sin + adjustedScaleY * cos + y, // Top-right
-		adjustedScaleX * cos + adjustedScaleY * sin + x,
-		adjustedScaleX * sin - adjustedScaleY * cos + y, // Bottom-right
+		-scaleX * cos - scaleY * sin + x,
+		-scaleX * sin + scaleY * cos + y, // Top-left
+		-scaleX * cos + scaleY * sin + x,
+		-scaleX * sin - scaleY * cos + y, // Bottom-left
+		scaleX * cos - scaleY * sin + x,
+		scaleX * sin + scaleY * cos + y, // Top-right
+		scaleX * cos + scaleY * sin + x,
+		scaleX * sin - scaleY * cos + y, // Bottom-right
 	]);
 
 	// Use the pre-initialized position buffer and set vertex positions

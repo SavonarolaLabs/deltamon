@@ -1,7 +1,7 @@
 import { abilityFolders } from './abilityFolders';
 import type { DrawSpell, SlotRenderData } from '$lib/types';
 
-const FLAME10_DURATION = 5000; // Duration in ms for flame10
+const FLAME10_DURATION = 500; // Duration in ms for flame10
 const FLAME2_DURATION = 200; // Duration in ms for flame2
 
 // Create flame10 (fireball) spell
