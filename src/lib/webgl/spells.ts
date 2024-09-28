@@ -165,3 +165,29 @@ export function createLightningImpact(targetSlot: SlotRenderData, folderName: st
 		angle: 0,
 	};
 }
+
+// punch
+
+export function createPunch(targetSlot: SlotRenderData, abilityFolder: string): DrawSpell {
+	const abilityData = abilityFolders.find(a => a.name === abilityFolder)!;
+
+	const xOffset = 100;
+
+	return {
+		currentFrame: 0,
+		duration: FLAME2_DURATION,
+		lastTime: 0,
+		startX: targetSlot.x + xOffset,
+		startY: targetSlot.y,
+		endX: targetSlot.x + xOffset,
+		endY: targetSlot.y,
+		abilityFolder: abilityData,
+		texturePath: abilityData.isGridFormat ? abilityData.path : `/abilities/${abilityFolder}/0000.png`,
+		x: targetSlot.x + xOffset,
+		y: targetSlot.y,
+		scale: 0.75,
+		draw: true,
+		zIndex: 2,
+		angle: Math.PI / 4,
+	};
+}

@@ -5,7 +5,7 @@
 	import { loadAllTextures } from './textures';
 	import { game } from '$lib/pvp/game';
 	import { playAudio, playAudioAfterDelay } from './audio';
-	import { createFlame10, createFlame2, createLightningImpact, createLightningProjectile, createWater10, createWater8, LIGHTNING_PROJECTILE_DURATION } from './spells';
+	import { createFlame10, createFlame2, createLightningImpact, createLightningProjectile, createPunch, createWater10, createWater8, LIGHTNING_PROJECTILE_DURATION } from './spells';
 	import { initializeSlotRenderData } from './slotRenderData';
 	import { applyHoverAnimation } from './hoverAnimation';
 	import type { DrawSpell, SlotRenderData, TextureMetadataMap } from '$lib/types';
@@ -146,7 +146,7 @@
 
 	function animate(time: number) {
 		updateSpells(time);
-		updateActiveCreature(time);
+		//updateActiveCreature(time);
 		updateActiveSlotMovement(time);
 		updateImpactAnimation(time);
 
@@ -194,6 +194,8 @@
 		}
 	}
 
+	let jumpAnimationId: number | null = null;
+	let returnAnimationId: number | null = null;
 	function updateActiveSlotMovement(time: number) {
 		if (activeSlotMoveStartTime && slotRenderData[activeSlotIndex]) {
 			const elapsedMoveTime = time - activeSlotMoveStartTime;
@@ -235,16 +237,113 @@
 		});
 	}
 
+	function castJumpAttack(targetIndex: number) {
+		const sourceSlot = slotRenderData[activeSlotIndex];
+		const targetSlot = slotRenderData[targetIndex];
+		const jumpDuration = 300;
+		const jumpHeight = 150;
+		const stopDistance = 330;
+		let jumpStartTime = performance.now();
+
+		const originalX = sourceSlot.originalX; // Ensure we use the correct original positions
+		const originalY = sourceSlot.originalY;
+		const originalScale = sourceSlot.scale;
+
+		// Cancel any ongoing animations
+		if (jumpAnimationId !== null) {
+			cancelAnimationFrame(jumpAnimationId);
+			jumpAnimationId = null;
+		}
+		if (returnAnimationId !== null) {
+			cancelAnimationFrame(returnAnimationId);
+			returnAnimationId = null;
+		}
+
+		// Reset to original position and state before starting a new jump
+		sourceSlot.x = originalX;
+		sourceSlot.y = originalY;
+		sourceSlot.scale = originalScale;
+		sourceSlot.isHovered = false;
+
+		// Target position calculations
+		const easeInCubic = (t: number) => t * t * t;
+		const targetX = targetSlot.x - stopDistance * Math.sign(targetSlot.x - sourceSlot.x);
+		const targetY = targetSlot.y;
+
+		// Jump animation
+		jumpAnimationId = requestAnimationFrame(function animateJump(time: number) {
+			const elapsed = time - jumpStartTime;
+			const progress = Math.min(elapsed / jumpDuration, 1);
+			const easedProgress = easeInCubic(progress);
+
+			// Move in a parabolic arc
+			sourceSlot.x = originalX + (targetX - originalX) * easedProgress;
+			sourceSlot.y = originalY + (targetY - originalY) * easedProgress - jumpHeight * Math.sin(easedProgress * Math.PI);
+
+			slotRenderData[activeSlotIndex] = { ...sourceSlot };
+
+			if (progress < 1) {
+				jumpAnimationId = requestAnimationFrame(animateJump);
+			} else {
+				// Trigger impact effect
+				playAudio('/mp3/punch2.mp3', 1, 0.0);
+				const punchImpact = createPunch(targetSlot, 'slash3');
+				drawSpells.push(punchImpact);
+
+				impactAnimations.push({
+					targetSlotIndex: targetIndex,
+					startTime: performance.now(),
+				});
+
+				// Return to original position after delay
+				setTimeout(() => {
+					let returnStartTime = performance.now();
+
+					// Animate return
+					returnAnimationId = requestAnimationFrame(function animateReturn(time: number) {
+						const returnElapsed = time - returnStartTime;
+						const returnProgress = Math.min(returnElapsed / (jumpDuration / 1.2), 1);
+
+						// Move back to original position
+						sourceSlot.x = targetX + (originalX - targetX) * returnProgress;
+						sourceSlot.y = targetY + (originalY - targetY) * returnProgress;
+
+						slotRenderData[activeSlotIndex] = { ...sourceSlot };
+
+						if (returnProgress < 1) {
+							returnAnimationId = requestAnimationFrame(animateReturn);
+						} else {
+							// Explicitly reset to original position and state
+							sourceSlot.x = originalX;
+							sourceSlot.y = originalY;
+							sourceSlot.scale = originalScale;
+							slotRenderData[activeSlotIndex] = { ...sourceSlot };
+
+							// Re-enable hover after jump is completed
+							sourceSlot.isHovered = true;
+
+							// Nullify animation IDs to prevent issues
+							jumpAnimationId = null;
+							returnAnimationId = null;
+						}
+					});
+				}, 150); // Shorter delay for return
+			}
+		});
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toUpperCase();
 
-		// Switch between spell modes
 		if (key === '1') {
-			spellMode = 'fireball'; // Set spell mode to fireball when "1" is pressed
+			spellMode = 'fireball';
 		} else if (key === '2') {
-			spellMode = 'waterball'; // Set spell mode to waterball when "2" is pressed
+			spellMode = 'waterball';
 		} else if (key === '3') {
-			spellMode = 'lightning'; // Set spell mode to lightning when "3" is pressed
+			spellMode = 'lightning';
+		} else if (key === '4') {
+			// New key for jump attack
+			spellMode = 'jumpAttack';
 		} else if (keyToSlotIndex[key] !== undefined) {
 			// Cast the spell based on the current spell mode
 			if (spellMode === 'lightning') {
@@ -253,6 +352,8 @@
 				castFireball(keyToSlotIndex[key]);
 			} else if (spellMode === 'waterball') {
 				castWaterball(keyToSlotIndex[key]);
+			} else if (spellMode === 'jumpAttack') {
+				castJumpAttack(keyToSlotIndex[key]);
 			}
 		}
 	}
