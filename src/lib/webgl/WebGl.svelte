@@ -134,7 +134,7 @@
 		playAudioAfterDelay('/mp3/lightning/06.mp3', 300, 1);
 
 		setTimeout(() => {
-			const lightningImpact = createLightningImpact(targetSlot, 'lightnings1_0001');
+			const lightningImpact = createLightningImpact(targetSlot, 'lightnings1_0000');
 			drawSpells.push(lightningImpact);
 
 			impactAnimations.push({

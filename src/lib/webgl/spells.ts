@@ -145,7 +145,7 @@ export function createLightningImpact(targetSlot: SlotRenderData, folderName: st
 	const abilityData = abilityFolders.find(a => a.name === folderName)!; // Use dynamic folder name
 
 	const xOffset = 40;
-	const yOffset = -150;
+	const yOffset = -20;
 
 	return {
 		currentFrame: 0,
