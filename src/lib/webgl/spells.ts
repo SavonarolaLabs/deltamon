@@ -118,18 +118,21 @@ export function createLightningProjectile(sourceSlot: SlotRenderData, targetSlot
 
 	const abilityData = abilityFolders.find(a => a.name === folderName)!; // Use dynamic folder name
 
+	const xOffset = 400;
+	const yOffset = 200;
+
 	return {
 		currentFrame: 0,
 		duration: LIGHTNING_PROJECTILE_DURATION,
 		lastTime: 0,
-		startX: sourceSlot.x,
-		startY: sourceSlot.y,
-		endX: targetSlot.x,
-		endY: targetSlot.y,
+		startX: sourceSlot.x + xOffset,
+		startY: sourceSlot.y + yOffset,
+		endX: targetSlot.x - xOffset,
+		endY: targetSlot.y + yOffset,
 		abilityFolder: abilityData,
 		texturePath: abilityData.path, // Use the correct grid texture path
-		x: sourceSlot.x,
-		y: sourceSlot.y,
+		x: sourceSlot.x + xOffset,
+		y: sourceSlot.y + yOffset,
 		scale: 1,
 		draw: true,
 		zIndex: 3,
@@ -141,19 +144,22 @@ export function createLightningProjectile(sourceSlot: SlotRenderData, targetSlot
 export function createLightningImpact(targetSlot: SlotRenderData, folderName: string): DrawSpell {
 	const abilityData = abilityFolders.find(a => a.name === folderName)!; // Use dynamic folder name
 
+	const xOffset = 40;
+	const yOffset = -150;
+
 	return {
 		currentFrame: 0,
 		duration: LIGHTNING_IMPACT_DURATION,
 		lastTime: 0,
-		startX: targetSlot.x,
-		startY: targetSlot.y,
-		endX: targetSlot.x,
-		endY: targetSlot.y,
+		startX: targetSlot.x + xOffset,
+		startY: targetSlot.y + yOffset,
+		endX: targetSlot.x + xOffset,
+		endY: targetSlot.y + yOffset,
 		abilityFolder: abilityData,
 		texturePath: abilityData.path, // Use the correct grid texture path
-		x: targetSlot.x,
-		y: targetSlot.y,
-		scale: 1,
+		x: targetSlot.x + yOffset,
+		y: targetSlot.y + yOffset,
+		scale: 0.7,
 		draw: true,
 		zIndex: 2,
 		angle: 0,
