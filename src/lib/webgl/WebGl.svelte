@@ -146,7 +146,7 @@
 
 	function animate(time: number) {
 		updateSpells(time);
-		//updateActiveCreature(time);
+		updateActiveCreature(time);
 		updateActiveSlotMovement(time);
 		updateImpactAnimation(time);
 
@@ -185,11 +185,13 @@
 	}
 
 	function updateActiveCreature(time: number) {
-		const activeCreature = game.activeCreature;
-		if (activeCreature) {
-			const activeCreatureSlotIndex = game.slots.findIndex(slot => slot.creature?.bcId === activeCreature.bcId);
-			if (activeCreatureSlotIndex !== -1 && slotRenderData[activeCreatureSlotIndex]) {
-				slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(slotRenderData[activeCreatureSlotIndex], time);
+		if (!jumpAnimationId && !returnAnimationId) {
+			const activeCreature = game.activeCreature;
+			if (activeCreature) {
+				const activeCreatureSlotIndex = game.slots.findIndex(slot => slot.creature?.bcId === activeCreature.bcId);
+				if (activeCreatureSlotIndex !== -1 && slotRenderData[activeCreatureSlotIndex]) {
+					slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(slotRenderData[activeCreatureSlotIndex], time);
+				}
 			}
 		}
 	}
