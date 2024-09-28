@@ -105,3 +105,57 @@ export function createWater10(targetSlot: SlotRenderData, abilityFolder: string)
 		angle: Math.PI / 2,
 	};
 }
+
+// Duration constants
+export const LIGHTNING_PROJECTILE_DURATION = 500; // Duration in ms
+const LIGHTNING_IMPACT_DURATION = 300; // Duration in ms
+
+// Create the lightning projectile spell
+export function createLightningProjectile(sourceSlot: SlotRenderData, targetSlot: SlotRenderData, folderName: string): DrawSpell {
+	const dx = targetSlot.x - sourceSlot.x;
+	const dy = targetSlot.y - sourceSlot.y;
+	const angle = Math.atan2(dy, dx);
+
+	const abilityData = abilityFolders.find(a => a.name === folderName)!; // Use dynamic folder name
+
+	return {
+		currentFrame: 0,
+		duration: LIGHTNING_PROJECTILE_DURATION,
+		lastTime: 0,
+		startX: sourceSlot.x,
+		startY: sourceSlot.y,
+		endX: targetSlot.x,
+		endY: targetSlot.y,
+		abilityFolder: abilityData,
+		texturePath: abilityData.path, // Use the correct grid texture path
+		x: sourceSlot.x,
+		y: sourceSlot.y,
+		scale: 1,
+		draw: true,
+		zIndex: 3,
+		angle,
+	};
+}
+
+// Create the lightning impact spell
+export function createLightningImpact(targetSlot: SlotRenderData, folderName: string): DrawSpell {
+	const abilityData = abilityFolders.find(a => a.name === folderName)!; // Use dynamic folder name
+
+	return {
+		currentFrame: 0,
+		duration: LIGHTNING_IMPACT_DURATION,
+		lastTime: 0,
+		startX: targetSlot.x,
+		startY: targetSlot.y,
+		endX: targetSlot.x,
+		endY: targetSlot.y,
+		abilityFolder: abilityData,
+		texturePath: abilityData.path, // Use the correct grid texture path
+		x: targetSlot.x,
+		y: targetSlot.y,
+		scale: 1,
+		draw: true,
+		zIndex: 2,
+		angle: 0,
+	};
+}

@@ -5,7 +5,7 @@
 	import { loadAllTextures } from './textures';
 	import { game } from '$lib/pvp/game';
 	import { playAudio, playAudioAfterDelay } from './audio';
-	import { createFlame10, createFlame2, createWater10, createWater8 } from './spells';
+	import { createFlame10, createFlame2, createLightningImpact, createLightningProjectile, createWater10, createWater8, LIGHTNING_PROJECTILE_DURATION } from './spells';
 	import { initializeSlotRenderData } from './slotRenderData';
 	import { applyHoverAnimation } from './hoverAnimation';
 	import type { DrawSpell, SlotRenderData, TextureMetadataMap } from '$lib/types';
@@ -45,7 +45,7 @@
 		D: 11,
 	};
 
-	let spellMode = 'waterball';
+	let spellMode = 'lightning';
 
 	async function initialize() {
 		const result = initWebGL(canvas);
@@ -121,6 +121,29 @@
 				startTime: performance.now(),
 			});
 		}, 500);
+	}
+
+	function castLightning(targetIndex: number) {
+		const sourceSlot = slotRenderData[activeSlotIndex];
+		const targetSlot = slotRenderData[targetIndex];
+
+		// Use water spell sounds for lightning temporarily
+		playAudio('/mp3/water/22.mp3', 1, 0.0); // Water sound for projectile
+		const lightningProjectile = createLightningProjectile(sourceSlot, targetSlot, 'lightnings1_0003');
+		drawSpells.push(lightningProjectile);
+
+		setTimeout(() => {
+			const lightningImpact = createLightningImpact(targetSlot, 'lightnings1_0003');
+			drawSpells.push(lightningImpact);
+
+			// Use water impact sound
+			playAudioAfterDelay('/mp3/water/46.mp3', 100, 1.1); // Water sound for impact
+
+			impactAnimations.push({
+				targetSlotIndex: targetIndex,
+				startTime: performance.now(),
+			});
+		}, LIGHTNING_PROJECTILE_DURATION); // Trigger the impact when the projectile finishes
 	}
 
 	function animate(time: number) {
@@ -213,12 +236,12 @@
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toUpperCase();
 
-		if (key === '1') {
-			spellMode = 'fireball';
-		} else if (key === '2') {
-			spellMode = 'waterball';
+		if (key === '3') {
+			spellMode = 'lightning'; // Set spell mode to lightning when "3" is pressed
 		} else if (keyToSlotIndex[key] !== undefined) {
-			if (spellMode === 'fireball') {
+			if (spellMode === 'lightning') {
+				castLightning(keyToSlotIndex[key]);
+			} else if (spellMode === 'fireball') {
 				castFireball(keyToSlotIndex[key]);
 			} else if (spellMode === 'waterball') {
 				castWaterball(keyToSlotIndex[key]);
