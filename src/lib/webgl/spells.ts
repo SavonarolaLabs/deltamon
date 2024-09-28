@@ -4,6 +4,9 @@ import type { DrawSpell, SlotRenderData } from '$lib/types';
 const FLAME10_DURATION = 600; // Duration in ms for flame10
 const FLAME2_DURATION = 300; // Duration in ms for flame2
 
+const WATER10_DURATION = 600; // Duration in ms for flame10
+const WATER2_DURATION = 350; // Duration in ms for flame2
+
 // Create flame10 (fireball) spell
 export function createFlame10(
 	sourceSlot: SlotRenderData,
@@ -54,6 +57,7 @@ export function createFlame2(targetSlot: SlotRenderData, abilityFolder: string):
 	};
 }
 
+// Waterball
 export function createWater8(sourceSlot: SlotRenderData, targetSlot: SlotRenderData, abilityFolder: string): DrawSpell {
 	const dx = targetSlot.x - sourceSlot.x;
 	const dy = targetSlot.y - sourceSlot.y;
@@ -61,7 +65,7 @@ export function createWater8(sourceSlot: SlotRenderData, targetSlot: SlotRenderD
 
 	return {
 		currentFrame: 0,
-		duration: FLAME10_DURATION,
+		duration: WATER10_DURATION,
 		lastTime: 0,
 		startX: sourceSlot.x,
 		startY: sourceSlot.y,
@@ -71,30 +75,29 @@ export function createWater8(sourceSlot: SlotRenderData, targetSlot: SlotRenderD
 		texturePath: `/abilities/${abilityFolder}/0000.png`,
 		x: sourceSlot.x - 0.12,
 		y: sourceSlot.y,
-		scale: 1,
+		scale: 0.5,
 		draw: true,
 		zIndex: 3,
 		angle, // Include the calculated angle
 	};
 }
 
-// Create flame2 (impact) spell
 export function createWater10(targetSlot: SlotRenderData, abilityFolder: string): DrawSpell {
 	return {
 		currentFrame: 0,
-		duration: FLAME2_DURATION,
+		duration: WATER2_DURATION,
 		lastTime: 0,
-		startX: targetSlot.x,
-		startY: targetSlot.y,
+		startX: targetSlot.x + 30,
+		startY: targetSlot.y + 35,
 		endX: targetSlot.x,
 		endY: targetSlot.y,
 		abilityFolder: abilityFolders.find(a => a.name === abilityFolder)!,
 		texturePath: `/abilities/${abilityFolder}/0000.png`,
-		x: targetSlot.x,
-		y: targetSlot.y,
-		scale: 0.7,
+		x: targetSlot.x + 30,
+		y: targetSlot.y + 35,
+		scale: 1.2,
 		draw: true,
 		zIndex: 2,
-		angle: 0, // No rotation needed for flame2
+		angle: Math.PI / 2, // No rotation needed for flame2
 	};
 }

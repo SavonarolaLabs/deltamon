@@ -45,7 +45,8 @@
 		D: 11,
 	};
 
-	let spellMode = 'fireball'; // Default spell mode
+	//let spellMode = 'fireball'; // Default spell mode
+	let spellMode = 'waterball'; // Default spell mode
 
 	async function initialize() {
 		const result = initWebGL(canvas);
