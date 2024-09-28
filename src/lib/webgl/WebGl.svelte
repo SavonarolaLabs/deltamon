@@ -8,7 +8,7 @@
 	import { createFlame10, createFlame2, createLightningImpact, createLightningProjectile, createPunch, createWater10, createWater8, LIGHTNING_PROJECTILE_DURATION } from './spells';
 	import { initializeSlotRenderData } from './slotRenderData';
 	import { applyHoverAnimation } from './hoverAnimation';
-	import type { DrawSpell, SlotRenderData, TextureMetadataMap } from '$lib/types';
+	import type { DrawSpell, SlotRenderData, TextureMetadataMap, ImpactAnimation, JumpAnimation } from '$lib/types';
 	import { startMatch } from '$lib/pvp/gameloop';
 
 	let canvas: HTMLCanvasElement;
@@ -21,12 +21,8 @@
 	let slotRenderData: SlotRenderData[] = [];
 	let animationFrameId: number;
 
-	interface ImpactAnimation {
-		targetSlotIndex: number;
-		startTime: number;
-	}
-
 	let impactAnimations: ImpactAnimation[] = [];
+	let jumpAnimations: JumpAnimation[] = [];
 
 	const activeSlotIndex = 1;
 	const impactDuration = 300;
@@ -81,6 +77,161 @@
 		textures = {};
 	}
 
+	function animate(time: number) {
+		updateSpells(time);
+		updateActiveCreature(time);
+		updateActiveSlotMovement(time);
+		updateImpactAnimation(time);
+		updateJumpAnimations(time);
+
+		drawScene(game, slotRenderData, gl, shaderProgram, textures, drawSpells);
+		animationFrameId = requestAnimationFrame(animate);
+	}
+
+	function updateSpells(time: number) {
+		drawSpells.forEach(spell => {
+			if (!spell.startTime) spell.startTime = time;
+			const elapsedTime = time - spell.startTime;
+			const progress = Math.min(elapsedTime / spell.duration, 1);
+
+			// Update frame for grid-based textures
+			if (spell.abilityFolder.isGridFormat) {
+				const totalFrames = spell.abilityFolder.frameCount;
+				spell.currentFrame = Math.floor(progress * (totalFrames - 1));
+			} else {
+				// Update frame for non-grid textures
+				const totalFrames = spell.abilityFolder.frameCount;
+				spell.currentFrame = Math.floor(progress * (totalFrames - 1));
+				spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
+			}
+
+			// Ensure movement is applied correctly
+			if (progress > 0.3) {
+				const moveProgress = (progress - 0.3) / 0.7;
+				spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
+				spell.y = spell.startY + (spell.endY - spell.startY) * moveProgress;
+			}
+
+			if (progress >= 1) spell.draw = false;
+		});
+
+		drawSpells = drawSpells.filter(spell => spell.draw);
+	}
+
+	function updateActiveCreature(time: number) {
+		if (jumpAnimations.length === 0) {
+			const activeCreature = game.activeCreature;
+			if (activeCreature) {
+				const activeCreatureSlotIndex = game.slots.findIndex(slot => slot.creature?.bcId === activeCreature.bcId);
+				if (activeCreatureSlotIndex !== -1 && slotRenderData[activeCreatureSlotIndex]) {
+					slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(slotRenderData[activeCreatureSlotIndex], time);
+				}
+			}
+		}
+	}
+
+	function updateActiveSlotMovement(time: number) {
+		if (activeSlotMoveStartTime && slotRenderData[activeSlotIndex]) {
+			const elapsedMoveTime = time - activeSlotMoveStartTime;
+			const moveProgress = Math.min(elapsedMoveTime / activeSlotMoveDuration, 1);
+			const easedMoveProgress = Math.sin(moveProgress * Math.PI);
+
+			slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX + activeSlotMoveOffset * easedMoveProgress;
+
+			if (moveProgress >= 1) {
+				slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX;
+				activeSlotMoveStartTime = null;
+			}
+		}
+	}
+
+	function updateImpactAnimation(time: number) {
+		impactAnimations = impactAnimations.filter(impact => {
+			const { targetSlotIndex, startTime } = impact;
+			const slot = slotRenderData[targetSlotIndex];
+
+			if (!slot) {
+				return false;
+			}
+
+			const elapsedImpactTime = time - startTime;
+			const impactProgress = Math.min(elapsedImpactTime / impactDuration, 1);
+			const easedImpactProgress = Math.sin(impactProgress * Math.PI);
+
+			slot.x = slot.originalX + kickOffset * easedImpactProgress;
+			slot.whiteFlash = 0.9 * (1 - impactProgress);
+
+			if (impactProgress >= 1) {
+				slot.x = slot.originalX;
+				slot.whiteFlash = 0;
+				return false;
+			}
+
+			return true;
+		});
+	}
+
+	function updateJumpAnimations(time: number) {
+		const easeInCubic = (t: number) => t * t * t;
+
+		jumpAnimations = jumpAnimations.filter(animation => {
+			const { slotIndex, targetSlotIndex, startTime, duration, startX, startY, targetX, targetY, jumpHeight, phase } = animation;
+			const slot = slotRenderData[slotIndex];
+
+			if (!slot) {
+				return false;
+			}
+
+			const elapsed = time - startTime;
+			const progress = Math.min(elapsed / duration, 1);
+			const easedProgress = easeInCubic(progress);
+
+			if (phase === 'jump') {
+				slot.x = startX + (targetX - startX) * easedProgress;
+				slot.y = startY + (targetY - startY) * easedProgress - jumpHeight * Math.sin(easedProgress * Math.PI);
+
+				if (progress >= 1) {
+					// At the end of the jump, trigger impact, and start return phase
+					playAudio('/mp3/punch2.mp3', 1, 0.0);
+					const targetSlot = slotRenderData[targetSlotIndex];
+					const punchImpact = createPunch(targetSlot, 'slash3');
+					drawSpells.push(punchImpact);
+
+					impactAnimations.push({
+						targetSlotIndex: targetSlotIndex,
+						startTime: performance.now(),
+					});
+
+					// Start return phase
+					animation.startTime = time;
+					animation.duration = duration / 1.2;
+					animation.phase = 'return';
+					animation.startX = slot.x;
+					animation.startY = slot.y;
+					animation.targetX = slot.originalX;
+					animation.targetY = slot.originalY;
+
+					return true; // Keep the animation in the array
+				} else {
+					return true; // Keep the animation in the array
+				}
+			} else if (phase === 'return') {
+				slot.x = startX + (targetX - startX) * progress;
+				slot.y = startY + (targetY - startY) * progress;
+
+				if (progress >= 1) {
+					// Return animation finished
+					slot.x = slot.originalX;
+					slot.y = slot.originalY;
+					slot.isHovered = true;
+					return false; // Remove the animation from the array
+				} else {
+					return true; // Keep the animation in the array
+				}
+			}
+		});
+	}
+
 	function castFireball(targetIndex: number) {
 		const sourceSlot = slotRenderData[activeSlotIndex];
 		const targetSlot = slotRenderData[targetIndex];
@@ -127,7 +278,6 @@
 		const sourceSlot = slotRenderData[activeSlotIndex];
 		const targetSlot = slotRenderData[targetIndex];
 
-		// Use water spell sounds for lightning temporarily
 		const lightningProjectile = createLightningProjectile(sourceSlot, targetSlot, 'lightnings1_0003');
 		drawSpells.push(lightningProjectile);
 		playAudio('/mp3/lightning/16.mp3', 1.3, 0.0);
@@ -141,102 +291,7 @@
 				targetSlotIndex: targetIndex,
 				startTime: performance.now(),
 			});
-		}, LIGHTNING_PROJECTILE_DURATION); // Trigger the impact when the projectile finishes
-	}
-
-	function animate(time: number) {
-		updateSpells(time);
-		updateActiveCreature(time);
-		updateActiveSlotMovement(time);
-		updateImpactAnimation(time);
-
-		drawScene(game, slotRenderData, gl, shaderProgram, textures, drawSpells);
-		animationFrameId = requestAnimationFrame(animate);
-	}
-
-	function updateSpells(time: number) {
-		drawSpells.forEach(spell => {
-			if (!spell.startTime) spell.startTime = time;
-			const elapsedTime = time - spell.startTime;
-			const progress = Math.min(elapsedTime / spell.duration, 1);
-
-			// Update frame for grid-based textures
-			if (spell.abilityFolder.isGridFormat) {
-				const totalFrames = spell.abilityFolder.frameCount;
-				spell.currentFrame = Math.floor(progress * (totalFrames - 1));
-			} else {
-				// Update frame for non-grid textures
-				const totalFrames = spell.abilityFolder.frameCount;
-				spell.currentFrame = Math.floor(progress * (totalFrames - 1));
-				spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
-			}
-
-			// Ensure movement is applied correctly
-			if (progress > 0.3) {
-				const moveProgress = (progress - 0.3) / 0.7;
-				spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
-				spell.y = spell.startY + (spell.endY - spell.startY) * moveProgress;
-			}
-
-			if (progress >= 1) spell.draw = false;
-		});
-
-		drawSpells = drawSpells.filter(spell => spell.draw);
-	}
-
-	function updateActiveCreature(time: number) {
-		if (!jumpAnimationId && !returnAnimationId) {
-			const activeCreature = game.activeCreature;
-			if (activeCreature) {
-				const activeCreatureSlotIndex = game.slots.findIndex(slot => slot.creature?.bcId === activeCreature.bcId);
-				if (activeCreatureSlotIndex !== -1 && slotRenderData[activeCreatureSlotIndex]) {
-					slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(slotRenderData[activeCreatureSlotIndex], time);
-				}
-			}
-		}
-	}
-
-	let jumpAnimationId: number | null = null;
-	let returnAnimationId: number | null = null;
-	function updateActiveSlotMovement(time: number) {
-		if (activeSlotMoveStartTime && slotRenderData[activeSlotIndex]) {
-			const elapsedMoveTime = time - activeSlotMoveStartTime;
-			const moveProgress = Math.min(elapsedMoveTime / activeSlotMoveDuration, 1);
-			const easedMoveProgress = Math.sin(moveProgress * Math.PI);
-
-			slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX + activeSlotMoveOffset * easedMoveProgress;
-
-			if (moveProgress >= 1) {
-				slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX;
-				activeSlotMoveStartTime = null;
-			}
-		}
-	}
-
-	function updateImpactAnimation(time: number) {
-		impactAnimations = impactAnimations.filter(impact => {
-			const { targetSlotIndex, startTime } = impact;
-			const slot = slotRenderData[targetSlotIndex];
-
-			if (!slot) {
-				return false;
-			}
-
-			const elapsedImpactTime = time - startTime;
-			const impactProgress = Math.min(elapsedImpactTime / impactDuration, 1);
-			const easedImpactProgress = Math.sin(impactProgress * Math.PI);
-
-			slot.x = slot.originalX + kickOffset * easedImpactProgress;
-			slot.whiteFlash = 0.9 * (1 - impactProgress);
-
-			if (impactProgress >= 1) {
-				slot.x = slot.originalX;
-				slot.whiteFlash = 0;
-				return false;
-			}
-
-			return true;
-		});
+		}, LIGHTNING_PROJECTILE_DURATION);
 	}
 
 	function castJumpAttack(targetIndex: number) {
@@ -245,93 +300,33 @@
 		const jumpDuration = 300;
 		const jumpHeight = 150;
 		const stopDistance = 330;
-		let jumpStartTime = performance.now();
 
-		const originalX = sourceSlot.originalX; // Ensure we use the correct original positions
+		const originalX = sourceSlot.originalX;
 		const originalY = sourceSlot.originalY;
-		const originalScale = sourceSlot.scale;
 
-		// Cancel any ongoing animations
-		if (jumpAnimationId !== null) {
-			cancelAnimationFrame(jumpAnimationId);
-			jumpAnimationId = null;
-		}
-		if (returnAnimationId !== null) {
-			cancelAnimationFrame(returnAnimationId);
-			returnAnimationId = null;
-		}
-
-		// Reset to original position and state before starting a new jump
-		sourceSlot.x = originalX;
-		sourceSlot.y = originalY;
-		sourceSlot.scale = originalScale;
-		sourceSlot.isHovered = false;
-
-		// Target position calculations
-		const easeInCubic = (t: number) => t * t * t;
 		const targetX = targetSlot.x - stopDistance * Math.sign(targetSlot.x - sourceSlot.x);
 		const targetY = targetSlot.y;
 
-		// Jump animation
-		jumpAnimationId = requestAnimationFrame(function animateJump(time: number) {
-			const elapsed = time - jumpStartTime;
-			const progress = Math.min(elapsed / jumpDuration, 1);
-			const easedProgress = easeInCubic(progress);
+		sourceSlot.x = originalX;
+		sourceSlot.y = originalY;
+		sourceSlot.isHovered = false;
 
-			// Move in a parabolic arc
-			sourceSlot.x = originalX + (targetX - originalX) * easedProgress;
-			sourceSlot.y = originalY + (targetY - originalY) * easedProgress - jumpHeight * Math.sin(easedProgress * Math.PI);
+		// Create a new JumpAnimation object
+		const jumpAnimation: JumpAnimation = {
+			slotIndex: activeSlotIndex,
+			targetSlotIndex: targetIndex,
+			startTime: performance.now(),
+			duration: jumpDuration,
+			startX: originalX,
+			startY: originalY,
+			targetX: targetX,
+			targetY: targetY,
+			jumpHeight: jumpHeight,
+			phase: 'jump',
+		};
 
-			slotRenderData[activeSlotIndex] = { ...sourceSlot };
-
-			if (progress < 1) {
-				jumpAnimationId = requestAnimationFrame(animateJump);
-			} else {
-				// Trigger impact effect
-				playAudio('/mp3/punch2.mp3', 1, 0.0);
-				const punchImpact = createPunch(targetSlot, 'slash3');
-				drawSpells.push(punchImpact);
-
-				impactAnimations.push({
-					targetSlotIndex: targetIndex,
-					startTime: performance.now(),
-				});
-
-				// Return to original position after delay
-				setTimeout(() => {
-					let returnStartTime = performance.now();
-
-					// Animate return
-					returnAnimationId = requestAnimationFrame(function animateReturn(time: number) {
-						const returnElapsed = time - returnStartTime;
-						const returnProgress = Math.min(returnElapsed / (jumpDuration / 1.2), 1);
-
-						// Move back to original position
-						sourceSlot.x = targetX + (originalX - targetX) * returnProgress;
-						sourceSlot.y = targetY + (originalY - targetY) * returnProgress;
-
-						slotRenderData[activeSlotIndex] = { ...sourceSlot };
-
-						if (returnProgress < 1) {
-							returnAnimationId = requestAnimationFrame(animateReturn);
-						} else {
-							// Explicitly reset to original position and state
-							sourceSlot.x = originalX;
-							sourceSlot.y = originalY;
-							sourceSlot.scale = originalScale;
-							slotRenderData[activeSlotIndex] = { ...sourceSlot };
-
-							// Re-enable hover after jump is completed
-							sourceSlot.isHovered = true;
-
-							// Nullify animation IDs to prevent issues
-							jumpAnimationId = null;
-							returnAnimationId = null;
-						}
-					});
-				}, 150); // Shorter delay for return
-			}
-		});
+		// Add to jumpAnimations array
+		jumpAnimations.push(jumpAnimation);
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -344,7 +339,6 @@
 		} else if (key === '3') {
 			spellMode = 'lightning';
 		} else if (key === '4') {
-			// New key for jump attack
 			spellMode = 'jumpAttack';
 		} else if (keyToSlotIndex[key] !== undefined) {
 			// Cast the spell based on the current spell mode

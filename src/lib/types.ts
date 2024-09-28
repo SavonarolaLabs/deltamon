@@ -128,3 +128,21 @@ export type TextureMetadata = {
 	gridCols?: number; // Number of columns in the grid
 };
 export type TextureMetadataMap = { [key: string]: TextureMetadata };
+
+export interface ImpactAnimation {
+	targetSlotIndex: number;
+	startTime: number;
+}
+
+export interface JumpAnimation {
+	slotIndex: number;
+	targetSlotIndex: number;
+	startTime: number;
+	duration: number;
+	startX: number;
+	startY: number;
+	targetX: number;
+	targetY: number;
+	jumpHeight: number;
+	phase: 'jump' | 'return';
+}
