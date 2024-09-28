@@ -139,10 +139,14 @@
 			const elapsedTime = time - spell.startTime;
 			const progress = Math.min(elapsedTime / spell.duration, 1);
 
-			// Calculate current frame differently for grid format
-			const totalFrames = spell.abilityFolder.frameCount;
-			spell.currentFrame = Math.floor(progress * (totalFrames - 1));
+			// Update the current frame for non-grid spells
+			if (!spell.abilityFolder.isGridFormat) {
+				const totalFrames = spell.abilityFolder.frameCount;
+				spell.currentFrame = Math.floor(progress * (totalFrames - 1));
+				spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame.toString().padStart(4, '0')}.png`;
+			}
 
+			// Ensure movement is applied correctly
 			if ((spell.abilityFolder.name === 'flame10' || spell.abilityFolder.name === 'water8') && progress > 0.3) {
 				const moveProgress = (progress - 0.3) / 0.7;
 				spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
