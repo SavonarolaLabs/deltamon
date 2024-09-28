@@ -2,12 +2,7 @@ import type { TextureMetadata, TextureMetadataMap } from '$lib/types';
 import { abilityFolders } from './abilityFolders';
 
 // Static array for creature and background textures
-const staticTexturePaths = [
-	'/monster/card_001.png',
-	'/monster/card_002.png',
-	'/monster/card_003.png',
-	'/bg/current.png',
-];
+const staticTexturePaths = ['/monster/card_001.png', '/monster/card_002.png', '/monster/card_003.png', '/bg/current.png'];
 
 // Utility function to load textures from paths and also return their metadata
 export function loadTextureFromPath(gl: WebGLRenderingContext, imageUrl: string): Promise<TextureMetadata> {
@@ -29,8 +24,6 @@ export function loadTextureFromPath(gl: WebGLRenderingContext, imageUrl: string)
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
 			// Set texture parameters
-			// Since we're using NPOT textures, we must use CLAMP_TO_EDGE and
-			// min/mag filters that do not require mipmaps.
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -70,20 +63,34 @@ export async function loadAllTextures(gl: WebGLRenderingContext): Promise<Textur
 
 	// Load ability textures
 	for (const ability of abilityFolders) {
-		const { path, frameCount } = ability;
-
-		await Promise.all(
-			Array.from({ length: frameCount }).map(async (_, i) => {
-				const frameName = `${i.toString().padStart(4, '0')}.png`;
-				const fullPath = `${path}/${frameName}`;
-				try {
-					const metadata = await loadTextureFromPath(gl, fullPath);
-					textureMetadataMap[fullPath] = metadata;
-				} catch (error) {
-					console.error(error);
-				}
-			})
-		);
+		if (ability.isGridFormat) {
+			// Load a single grid texture
+			try {
+				const metadata = await loadTextureFromPath(gl, ability.path);
+				textureMetadataMap[ability.path] = {
+					...metadata,
+					isGridFormat: true,
+					gridRows: ability.gridRows,
+					gridCols: ability.gridCols,
+				};
+			} catch (error) {
+				console.error(error);
+			}
+		} else {
+			// Load individual frame textures
+			await Promise.all(
+				Array.from({ length: ability.frameCount }).map(async (_, i) => {
+					const frameName = `${i.toString().padStart(4, '0')}.png`;
+					const fullPath = `${ability.path}/${frameName}`;
+					try {
+						const metadata = await loadTextureFromPath(gl, fullPath);
+						textureMetadataMap[fullPath] = metadata;
+					} catch (error) {
+						console.error(error);
+					}
+				})
+			);
+		}
 	}
 
 	return textureMetadataMap;

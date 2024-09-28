@@ -1,4 +1,4 @@
-import type { DrawSpell, GameState, SlotRenderData, TextureMetadataMap, TextureMetadata } from '$lib/types';
+import type { DrawSpell, GameState, SlotRenderData, TextureMetadataMap, TextureMetadata, DrawElement } from '$lib/types';
 import { initBuffers } from './buffers';
 import { mat4 } from 'gl-matrix';
 import { drawBackground } from './drawBackground';
@@ -23,14 +23,7 @@ export function initDrawScene(gl: WebGLRenderingContext, shaderProgram: WebGLPro
 	gl.uniform1i(samplerUniform, 0);
 }
 
-export function drawScene(
-	game: GameState,
-	slotRenderData: SlotRenderData[],
-	gl: WebGLRenderingContext,
-	shaderProgram: WebGLProgram,
-	textures: TextureMetadataMap,
-	drawSpells: DrawSpell[]
-) {
+export function drawScene(game: GameState, slotRenderData: SlotRenderData[], gl: WebGLRenderingContext, shaderProgram: WebGLProgram, textures: TextureMetadataMap, drawSpells: DrawSpell[]) {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	// Create and set the projection matrix
@@ -53,12 +46,7 @@ export function drawScene(
 	}
 
 	// Collect all elements to draw
-	const allElements = [...slotRenderData, ...drawSpells.filter(spell => spell.draw)].sort(
-		(a, b) => a.zIndex - b.zIndex
-	);
-	if (allElements.some(e => e.zIndex == 1)) {
-		console.log('zindesdfsd');
-	}
+	const allElements: DrawElement[] = [...slotRenderData, ...drawSpells.filter(spell => spell.draw)].sort((a, b) => a.zIndex - b.zIndex);
 
 	for (const element of allElements) {
 		const textureMetadata = textures[element.texturePath];
@@ -77,7 +65,8 @@ export function drawScene(
 				textureCoordAttribute,
 				whiteFlash,
 				angle,
-				whiteFlashUniform
+				whiteFlashUniform,
+				element.currentFrame // Pass the current frame for grid calculation
 			);
 		} else {
 			console.warn(`Texture not found for path: ${element.texturePath}`);
@@ -98,9 +87,10 @@ function drawElement(
 	textureCoordAttribute: number,
 	whiteFlash: number = 0,
 	angle: number = 0,
-	whiteFlashUniform: WebGLUniformLocation
+	whiteFlashUniform: WebGLUniformLocation,
+	currentFrame: number
 ) {
-	const { width: imageWidth, height: imageHeight } = textureMetadata;
+	const { width: imageWidth, height: imageHeight, isGridFormat, gridRows = 1, gridCols = 1 } = textureMetadata;
 
 	// Define positions for vertices before rotation
 	let positions = new Float32Array([
@@ -122,7 +112,6 @@ function drawElement(
 
 	// Apply scaling, rotation, and translation to each vertex
 	for (let i = 0; i < positions.length; i += 2) {
-		// Translate vertices to center at (0, 0)
 		let x0 = positions[i] - centerX;
 		let y0 = positions[i + 1] - centerY;
 
@@ -148,16 +137,40 @@ function drawElement(
 	// Bind texture and set texture coordinates
 	gl.bindTexture(gl.TEXTURE_2D, textureMetadata.texture);
 	gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-	const textureCoords = new Float32Array([
-		0.0,
-		0.0, // Top-left
-		0.0,
-		1.0, // Bottom-left
-		1.0,
-		0.0, // Top-right
-		1.0,
-		1.0, // Bottom-right
-	]);
+
+	let textureCoords;
+	if (isGridFormat) {
+		// Calculate frame position within the grid
+		const frameX = currentFrame % gridCols;
+		const frameY = Math.floor(currentFrame / gridCols);
+		const cellWidth = 1 / gridCols;
+		const cellHeight = 1 / gridRows;
+
+		// Texture coordinates based on grid cell
+		textureCoords = new Float32Array([
+			frameX * cellWidth,
+			frameY * cellHeight, // Top-left
+			frameX * cellWidth,
+			(frameY + 1) * cellHeight, // Bottom-left
+			(frameX + 1) * cellWidth,
+			frameY * cellHeight, // Top-right
+			(frameX + 1) * cellWidth,
+			(frameY + 1) * cellHeight, // Bottom-right
+		]);
+	} else {
+		// Default texture coordinates for non-grid textures
+		textureCoords = new Float32Array([
+			0.0,
+			0.0, // Top-left
+			0.0,
+			1.0, // Bottom-left
+			1.0,
+			0.0, // Top-right
+			1.0,
+			1.0, // Bottom-right
+		]);
+	}
+
 	gl.bufferData(gl.ARRAY_BUFFER, textureCoords, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(textureCoordAttribute);

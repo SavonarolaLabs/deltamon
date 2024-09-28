@@ -30,11 +30,11 @@
 
 	const activeSlotIndex = 1;
 	const impactDuration = 300;
-	const kickOffset = 60; // Adjust based on pixel coordinates
+	const kickOffset = 60;
 
 	let activeSlotMoveStartTime: number | null = null;
 	const activeSlotMoveDuration = 200;
-	const activeSlotMoveOffset = -20; // Adjust based on pixel coordinates
+	const activeSlotMoveOffset = -20;
 
 	const keyToSlotIndex = {
 		Q: 6,
@@ -45,8 +45,7 @@
 		D: 11,
 	};
 
-	//let spellMode = 'fireball'; // Default spell mode
-	let spellMode = 'waterball'; // Default spell mode
+	let spellMode = 'waterball';
 
 	async function initialize() {
 		const result = initWebGL(canvas);
@@ -71,7 +70,6 @@
 			canvas.style.height = `${height}px`;
 			gl.viewport(0, 0, canvas.width, canvas.height);
 
-			// Recalculate slot positions based on new canvas size
 			slotRenderData = initializeSlotRenderData(game, gl);
 		}
 	}
@@ -109,13 +107,13 @@
 		const targetSlot = slotRenderData[targetIndex];
 
 		playAudio('/mp3/water/22.mp3', 1, 0.0);
-		const water10 = createWater8(sourceSlot, targetSlot, 'water8'); // Use water10 textures
+		const water10 = createWater8(sourceSlot, targetSlot, 'water8');
 		drawSpells.push(water10);
 		activeSlotMoveStartTime = performance.now();
 		playAudioAfterDelay('/mp3/water/46.mp3', 350, 1.1);
 
 		setTimeout(() => {
-			const water2 = createWater10(targetSlot, 'water10'); // Use water2 textures
+			const water2 = createWater10(targetSlot, 'water10');
 			drawSpells.push(water2);
 
 			impactAnimations.push({
@@ -140,10 +138,10 @@
 			if (!spell.startTime) spell.startTime = time;
 			const elapsedTime = time - spell.startTime;
 			const progress = Math.min(elapsedTime / spell.duration, 1);
-			spell.currentFrame = Math.floor(progress * (spell.abilityFolder.frameCount - 1));
-			spell.texturePath = `/abilities/${spell.abilityFolder.name}/${spell.currentFrame
-				.toString()
-				.padStart(4, '0')}.png`;
+
+			// Calculate current frame differently for grid format
+			const totalFrames = spell.abilityFolder.frameCount;
+			spell.currentFrame = Math.floor(progress * (totalFrames - 1));
 
 			if ((spell.abilityFolder.name === 'flame10' || spell.abilityFolder.name === 'water8') && progress > 0.3) {
 				const moveProgress = (progress - 0.3) / 0.7;
@@ -162,10 +160,7 @@
 		if (activeCreature) {
 			const activeCreatureSlotIndex = game.slots.findIndex(slot => slot.creature?.bcId === activeCreature.bcId);
 			if (activeCreatureSlotIndex !== -1 && slotRenderData[activeCreatureSlotIndex]) {
-				slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(
-					slotRenderData[activeCreatureSlotIndex],
-					time
-				);
+				slotRenderData[activeCreatureSlotIndex] = applyHoverAnimation(slotRenderData[activeCreatureSlotIndex], time);
 			}
 		}
 	}
@@ -176,8 +171,7 @@
 			const moveProgress = Math.min(elapsedMoveTime / activeSlotMoveDuration, 1);
 			const easedMoveProgress = Math.sin(moveProgress * Math.PI);
 
-			slotRenderData[activeSlotIndex].x =
-				slotRenderData[activeSlotIndex].originalX + activeSlotMoveOffset * easedMoveProgress;
+			slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX + activeSlotMoveOffset * easedMoveProgress;
 
 			if (moveProgress >= 1) {
 				slotRenderData[activeSlotIndex].x = slotRenderData[activeSlotIndex].originalX;
@@ -192,7 +186,7 @@
 			const slot = slotRenderData[targetSlotIndex];
 
 			if (!slot) {
-				return false; // Remove impact if slot doesn't exist
+				return false;
 			}
 
 			const elapsedImpactTime = time - startTime;
@@ -205,10 +199,10 @@
 			if (impactProgress >= 1) {
 				slot.x = slot.originalX;
 				slot.whiteFlash = 0;
-				return false; // Remove impact animation from the array
+				return false;
 			}
 
-			return true; // Keep the impact animation in the array
+			return true;
 		});
 	}
 
@@ -234,7 +228,7 @@
 		initialize();
 		window.addEventListener('keydown', handleKeydown);
 		window.addEventListener('resize', handleResize);
-		handleResize(); // Ensure initial canvas size is set
+		handleResize();
 	});
 
 	onDestroy(() => {

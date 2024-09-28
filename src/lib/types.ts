@@ -60,12 +60,7 @@ export type Ability = {
 	action: AbilityFunction;
 };
 
-export type AbilityFunction = (
-	game: GameState,
-	sourceId: BattleCreatureId,
-	targetIds: BattleCreatureId[],
-	ability: Ability
-) => GameState;
+export type AbilityFunction = (game: GameState, sourceId: BattleCreatureId, targetIds: BattleCreatureId[], ability: Ability) => GameState;
 
 export type Damage = {
 	amount: number;
@@ -81,6 +76,25 @@ export type AbilityFolder = {
 	name: string;
 	path: string;
 	frameCount: number;
+	isGridFormat?: boolean; // New property indicating if the ability uses a grid format
+	gridRows?: number; // Number of rows in the grid
+	gridCols?: number; // Number of columns in the grid
+};
+
+export type SlotRenderData = {
+	slotIndex: number;
+	playerId: number;
+	texturePath: string;
+	originalX: number;
+	originalY: number;
+	x: number;
+	y: number;
+	scale: number;
+	zIndex: number;
+	isHovered: boolean;
+	whiteFlash?: number;
+	angle?: number;
+	currentFrame: number; // Added to align with DrawSpell
 };
 
 export type DrawSpell = {
@@ -101,22 +115,7 @@ export type DrawSpell = {
 	zIndex: number;
 	draw: boolean;
 	whiteFlash?: number;
-	angle?: number; // New property
-};
-
-export type SlotRenderData = {
-	slotIndex: number;
-	playerId: number;
-	texturePath: string;
-	originalX: number;
-	originalY: number;
-	x: number;
-	y: number;
-	scale: number;
-	zIndex: number;
-	isHovered: boolean;
-	whiteFlash?: number;
-	angle?: number; // New property
+	angle?: number;
 };
 
 export type TextureMetadata = {
@@ -124,5 +123,8 @@ export type TextureMetadata = {
 	width: number;
 	height: number;
 	aspectRatio: number;
+	isGridFormat?: boolean; // New property for texture metadata
+	gridRows?: number; // Number of rows in the grid
+	gridCols?: number; // Number of columns in the grid
 };
 export type TextureMetadataMap = { [key: string]: TextureMetadata };
