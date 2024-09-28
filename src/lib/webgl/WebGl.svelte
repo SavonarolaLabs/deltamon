@@ -128,16 +128,14 @@
 		const targetSlot = slotRenderData[targetIndex];
 
 		// Use water spell sounds for lightning temporarily
-		playAudio('/mp3/water/22.mp3', 1, 0.0); // Water sound for projectile
 		const lightningProjectile = createLightningProjectile(sourceSlot, targetSlot, 'lightnings1_0003');
 		drawSpells.push(lightningProjectile);
+		playAudio('/mp3/lightning/16.mp3', 1.3, 0.0);
+		playAudioAfterDelay('/mp3/lightning/06.mp3', 300, 1);
 
 		setTimeout(() => {
 			const lightningImpact = createLightningImpact(targetSlot, 'lightnings1_0001');
 			drawSpells.push(lightningImpact);
-
-			// Use water impact sound
-			playAudioAfterDelay('/mp3/water/46.mp3', 100, 1.1); // Water sound for impact
 
 			impactAnimations.push({
 				targetSlotIndex: targetIndex,
