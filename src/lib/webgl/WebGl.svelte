@@ -5,7 +5,7 @@
 	import { loadAllTextures } from './textures';
 	import { game } from '$lib/pvp/game';
 	import { playAudio, playAudioAfterDelay } from './audio';
-	import { createFlame10, createFlame2 } from './spells';
+	import { createFlame10, createFlame2, createWater10, createWater8 } from './spells';
 	import { initializeSlotRenderData } from './slotRenderData';
 	import { applyHoverAnimation } from './hoverAnimation';
 	import type { DrawSpell, SlotRenderData, TextureMetadataMap } from '$lib/types';
@@ -44,6 +44,8 @@
 		S: 10,
 		D: 11,
 	};
+
+	let spellMode = 'fireball'; // Default spell mode
 
 	async function initialize() {
 		const result = initWebGL(canvas);
@@ -85,17 +87,36 @@
 		const targetSlot = slotRenderData[targetIndex];
 
 		playAudio('/mp3/fireball.mp3', 1, 0.0);
-		const flame10 = createFlame10(sourceSlot, targetSlot);
+		const flame10 = createFlame10(sourceSlot, targetSlot, 'flame10');
 		drawSpells.push(flame10);
 		activeSlotMoveStartTime = performance.now();
-		//playAudioAfterDelay('/mp3/explosion.mp3', 350, 2);
 		playAudioAfterDelay('/mp3/blast.mp3', 350, 1.1);
 
 		setTimeout(() => {
-			const flame2 = createFlame2(targetSlot);
+			const flame2 = createFlame2(targetSlot, 'flame2');
 			drawSpells.push(flame2);
 
-			// Start a new impact animation
+			impactAnimations.push({
+				targetSlotIndex: targetIndex,
+				startTime: performance.now(),
+			});
+		}, 500);
+	}
+
+	function castWaterball(targetIndex: number) {
+		const sourceSlot = slotRenderData[activeSlotIndex];
+		const targetSlot = slotRenderData[targetIndex];
+
+		playAudio('/mp3/water/22.mp3', 1, 0.0);
+		const water10 = createWater8(sourceSlot, targetSlot, 'water8'); // Use water10 textures
+		drawSpells.push(water10);
+		activeSlotMoveStartTime = performance.now();
+		playAudioAfterDelay('/mp3/water/46.mp3', 350, 1.1);
+
+		setTimeout(() => {
+			const water2 = createWater10(targetSlot, 'water10'); // Use water2 textures
+			drawSpells.push(water2);
+
 			impactAnimations.push({
 				targetSlotIndex: targetIndex,
 				startTime: performance.now(),
@@ -123,7 +144,7 @@
 				.toString()
 				.padStart(4, '0')}.png`;
 
-			if (spell.abilityFolder.name === 'flame10' && progress > 0.3) {
+			if ((spell.abilityFolder.name === 'flame10' || spell.abilityFolder.name === 'water8') && progress > 0.3) {
 				const moveProgress = (progress - 0.3) / 0.7;
 				spell.x = spell.startX + (spell.endX - spell.startX) * moveProgress;
 				spell.y = spell.startY + (spell.endY - spell.startY) * moveProgress;
@@ -192,10 +213,17 @@
 
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toUpperCase();
-		//@ts-ignore
-		if (keyToSlotIndex[key] !== undefined) {
-			//@ts-ignore
-			castFireball(keyToSlotIndex[key]);
+
+		if (key === '1') {
+			spellMode = 'fireball';
+		} else if (key === '2') {
+			spellMode = 'waterball';
+		} else if (keyToSlotIndex[key] !== undefined) {
+			if (spellMode === 'fireball') {
+				castFireball(keyToSlotIndex[key]);
+			} else if (spellMode === 'waterball') {
+				castWaterball(keyToSlotIndex[key]);
+			}
 		}
 	}
 

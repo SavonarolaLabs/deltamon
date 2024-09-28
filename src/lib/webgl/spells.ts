@@ -5,7 +5,11 @@ const FLAME10_DURATION = 600; // Duration in ms for flame10
 const FLAME2_DURATION = 300; // Duration in ms for flame2
 
 // Create flame10 (fireball) spell
-export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRenderData): DrawSpell {
+export function createFlame10(
+	sourceSlot: SlotRenderData,
+	targetSlot: SlotRenderData,
+	abilityFolder: string
+): DrawSpell {
 	const dx = targetSlot.x - sourceSlot.x;
 	const dy = targetSlot.y - sourceSlot.y;
 	const angle = Math.atan2(dy, dx);
@@ -18,8 +22,8 @@ export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRender
 		startY: sourceSlot.y,
 		endX: targetSlot.x,
 		endY: targetSlot.y,
-		abilityFolder: abilityFolders.find(a => a.name === 'flame10')!,
-		texturePath: `/abilities/flame10/0000.png`,
+		abilityFolder: abilityFolders.find(a => a.name === abilityFolder)!,
+		texturePath: `/abilities/${abilityFolder}/0000.png`,
 		x: sourceSlot.x - 0.12,
 		y: sourceSlot.y,
 		scale: 1,
@@ -30,7 +34,7 @@ export function createFlame10(sourceSlot: SlotRenderData, targetSlot: SlotRender
 }
 
 // Create flame2 (impact) spell
-export function createFlame2(targetSlot: SlotRenderData): DrawSpell {
+export function createFlame2(targetSlot: SlotRenderData, abilityFolder: string): DrawSpell {
 	return {
 		currentFrame: 0,
 		duration: FLAME2_DURATION,
@@ -39,8 +43,53 @@ export function createFlame2(targetSlot: SlotRenderData): DrawSpell {
 		startY: targetSlot.y,
 		endX: targetSlot.x,
 		endY: targetSlot.y,
-		abilityFolder: abilityFolders.find(a => a.name === 'flame2')!,
-		texturePath: `/abilities/flame2/0000.png`,
+		abilityFolder: abilityFolders.find(a => a.name === abilityFolder)!,
+		texturePath: `/abilities/${abilityFolder}/0000.png`,
+		x: targetSlot.x,
+		y: targetSlot.y,
+		scale: 0.7,
+		draw: true,
+		zIndex: 2,
+		angle: 0, // No rotation needed for flame2
+	};
+}
+
+export function createWater8(sourceSlot: SlotRenderData, targetSlot: SlotRenderData, abilityFolder: string): DrawSpell {
+	const dx = targetSlot.x - sourceSlot.x;
+	const dy = targetSlot.y - sourceSlot.y;
+	const angle = Math.atan2(dy, dx);
+
+	return {
+		currentFrame: 0,
+		duration: FLAME10_DURATION,
+		lastTime: 0,
+		startX: sourceSlot.x,
+		startY: sourceSlot.y,
+		endX: targetSlot.x,
+		endY: targetSlot.y,
+		abilityFolder: abilityFolders.find(a => a.name === abilityFolder)!,
+		texturePath: `/abilities/${abilityFolder}/0000.png`,
+		x: sourceSlot.x - 0.12,
+		y: sourceSlot.y,
+		scale: 1,
+		draw: true,
+		zIndex: 3,
+		angle, // Include the calculated angle
+	};
+}
+
+// Create flame2 (impact) spell
+export function createWater10(targetSlot: SlotRenderData, abilityFolder: string): DrawSpell {
+	return {
+		currentFrame: 0,
+		duration: FLAME2_DURATION,
+		lastTime: 0,
+		startX: targetSlot.x,
+		startY: targetSlot.y,
+		endX: targetSlot.x,
+		endY: targetSlot.y,
+		abilityFolder: abilityFolders.find(a => a.name === abilityFolder)!,
+		texturePath: `/abilities/${abilityFolder}/0000.png`,
 		x: targetSlot.x,
 		y: targetSlot.y,
 		scale: 0.7,
