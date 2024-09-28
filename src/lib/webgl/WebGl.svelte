@@ -238,9 +238,15 @@
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key.toUpperCase();
 
-		if (key === '3') {
+		// Switch between spell modes
+		if (key === '1') {
+			spellMode = 'fireball'; // Set spell mode to fireball when "1" is pressed
+		} else if (key === '2') {
+			spellMode = 'waterball'; // Set spell mode to waterball when "2" is pressed
+		} else if (key === '3') {
 			spellMode = 'lightning'; // Set spell mode to lightning when "3" is pressed
 		} else if (keyToSlotIndex[key] !== undefined) {
+			// Cast the spell based on the current spell mode
 			if (spellMode === 'lightning') {
 				castLightning(keyToSlotIndex[key]);
 			} else if (spellMode === 'fireball') {
