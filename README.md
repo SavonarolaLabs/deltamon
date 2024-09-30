@@ -92,7 +92,6 @@ Full list of image concepts for creatures can be found [here](https://savonarola
 <h1>Creatures</h1>
 
 <table border="1" cellpadding="5" cellspacing="0">
-
 <tr><td>1</td><td>Fire</td><td>Beast</td><td>Roar, Claws Sweep</td><td>Meele</td><td>Fighter</td><td>Bruiser</td><td>Attack
 </td></tr>
 <tr><td>2</td><td>Nature</td><td>Beast</td><td>Heal</td><td>Meele</td><td>Mage</td><td>Buffer</td><td>Defensive
