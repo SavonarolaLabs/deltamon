@@ -10,6 +10,7 @@
 	import { applyHoverAnimation } from './hoverAnimation';
 	import type { DrawSpell, SlotRenderData, TextureMetadataMap, ImpactAnimation, JumpAnimation } from '$lib/types';
 	import { startMatch } from '$lib/pvp/gameloop';
+	import Navigation from '$lib/Navigation.svelte';
 
 	let canvas: HTMLCanvasElement;
 	let gl: WebGLRenderingContext | null;
@@ -376,6 +377,7 @@
 	});
 </script>
 
+<Navigation></Navigation>
 <canvas bind:this={canvas}></canvas>
 
 <style>

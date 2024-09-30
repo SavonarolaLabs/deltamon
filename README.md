@@ -1,38 +1,5 @@
-# create-svelte
+# Deltamon
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+![Deltamon Screenshot](https://i.ibb.co/khLgnGt/Screenshot-2024-09-30-at-19-37-30.png)
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+Deltamon is a turn-based RPG card game where players select creatures, position them on a board, and use abilities to battle based on initiative. The game features mechanics such as skill selection, HP management, buffs/debuffs, and elemental effects like fire and ice, with both active and passive abilities influencing gameplay. The most fun part - creatures evolve.
