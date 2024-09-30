@@ -5,7 +5,7 @@ Deltamon is a turn-based RPG card game where players select creatures, position 
 # WebGl game concept
 
 ![WebGl Screenshot](https://i.ibb.co/M7W6RDj/Screenshot-2024-09-30-at-19-57-43.png)
-https://savonarolalabs.github.io/deltamon/pvp
+DEMO: https://savonarolalabs.github.io/deltamon/
 
 -   Press Q W E A S D to throw spells
 
