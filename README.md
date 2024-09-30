@@ -1,11 +1,10 @@
 # Deltamon
 
-![Deltamon Screenshot](https://i.ibb.co/khLgnGt/Screenshot-2024-09-30-at-19-37-30.png)
-
 Deltamon is a turn-based RPG card game where players select creatures, position them on a board, and use abilities to battle based on initiative. The game features mechanics such as skill selection, HP management, buffs/debuffs, and elemental effects like fire and ice, with both active and passive abilities influencing gameplay. The most fun part - creatures evolve.
 
 # WebGl game concept
 
+![WebGl Screenshot](https://i.ibb.co/M7W6RDj/Screenshot-2024-09-30-at-19-57-43.png)
 https://savonarolalabs.github.io/deltamon/pvp
 
 -   Press Q W E A S D to throw spells
@@ -18,11 +17,10 @@ https://savonarolalabs.github.io/deltamon/pvp
 
 # Dex
 
+![Deltamon Screenshot](https://i.ibb.co/khLgnGt/Screenshot-2024-09-30-at-19-37-30.png)
 Full list of image concepts for creatures can be found [here](https://savonarolalabs.github.io/deltamon/dex).
 
-# Mechanics
-
-<h1>Creatures</h1>
+<h1>Mechanics</h1>
 
 <h2>Action Types</h2>
 <table border="1" cellpadding="5" cellspacing="0">
@@ -91,7 +89,7 @@ Full list of image concepts for creatures can be found [here](https://savonarola
   <tr><td></td><td>Each Creature End</td><td></td><td></td><td></td><td></td><td></td></tr>
 </table>
 
-# Abilities
+<h1>Creatures</h1>
 
 <table border="1" cellpadding="5" cellspacing="0">
 
