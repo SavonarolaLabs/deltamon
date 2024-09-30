@@ -1,3 +1,4 @@
+import { base } from '$app/paths';
 import type { TextureMetadata, TextureMetadataMap } from '$lib/types';
 import { abilityFolders } from './abilityFolders';
 
@@ -15,7 +16,7 @@ export function loadTextureFromPath(gl: WebGLRenderingContext, imageUrl: string)
 
 		const image = new Image();
 		image.crossOrigin = 'anonymous';
-		image.src = imageUrl;
+		image.src = base + imageUrl;
 
 		image.onload = () => {
 			gl.bindTexture(gl.TEXTURE_2D, texture);
