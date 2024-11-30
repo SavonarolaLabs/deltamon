@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { base } from "$app/paths";
+	import { base } from '$app/paths';
 
-	import Navigation from "$lib/Navigation.svelte";
-	import Filter from "$lib/Filter.svelte";
-	import { nft_details_popup_nft, nft_details_popup_show } from "$lib/store";
-	import MonsterPopup from "$lib/MonsterPopup.svelte";
-	import { creatureImages } from "$lib/creatureImages";
+	import Navigation from '$lib/Navigation.svelte';
+	import Filter from '$lib/Filter.svelte';
+	import { nft_details_popup_nft, nft_details_popup_show } from '$lib/store';
+	import MonsterPopup from '$lib/MonsterPopup.svelte';
+	import { creatureImages } from '$lib/creatureImages';
+	import { names } from '$lib/names';
+
+	const meta = names.flatMap(x => x);
 
 	function openInPopup(nft) {
 		nft_details_popup_nft.set(nft);
@@ -17,10 +20,7 @@
 <MonsterPopup></MonsterPopup>
 <div class="flex">
 	<div class="" style="">
-		<div
-			style="position: sticky; top: 80px;"
-			class="filters flex items-center p-2 pl-3"
-		>
+		<div style="position: sticky; top: 80px;" class="filters flex items-center p-2 pl-3">
 			<Filter></Filter>
 		</div>
 	</div>
@@ -33,13 +33,12 @@
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<div on:click={() => openInPopup(evolution)}>
-							<img
-								src={base + "/monster/" + evolution}
-								alt=""
-								style="width:250px;"
-							/>
+							<img src={base + '/monster/' + evolution} alt="" style="width:250px;" />
 						</div>
-						<div>{evolution.split(".")[0]}</div>
+						<div>{meta.find(m => m.image == evolution)?.name}</div>
+						<div>{meta.find(m => m.image == evolution)?.description}</div>
+						<div>{meta.find(m => m.image == evolution)?.lore}</div>
+						<div>{evolution.split('.')[0]}</div>
 					</div>
 				{/each}
 			</div>
@@ -61,7 +60,7 @@
 		color: white;
 		padding-left: 1em;
 		padding-right: 1em;
-		font-family: "system-ui";
+		font-family: 'system-ui';
 		font-size: small;
 		font-weight: 500;
 	}

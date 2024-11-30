@@ -344,7 +344,9 @@
 		} else if (keyToSlotIndex[key] !== undefined) {
 			// Cast the spell based on the current spell mode
 			if (spellMode === 'lightning') {
-				castLightning(keyToSlotIndex[key]);
+				setTimeout(() => {
+					castLightning(keyToSlotIndex[key]);
+				}, 10000);
 			} else if (spellMode === 'fireball') {
 				castFireball(keyToSlotIndex[key]);
 			} else if (spellMode === 'waterball') {
