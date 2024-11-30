@@ -36,7 +36,7 @@
 							<img src={base + '/monster/' + evolution} alt="" style="width:250px;" />
 						</div>
 						<div>{meta.find(m => m.image == evolution)?.name}</div>
-						<div>{meta.find(m => m.image == evolution)?.description}</div>
+						<div class="font-bold">{meta.find(m => m.image == evolution)?.description}</div>
 						<div>{meta.find(m => m.image == evolution)?.lore}</div>
 						<div>{evolution.split('.')[0]}</div>
 					</div>
