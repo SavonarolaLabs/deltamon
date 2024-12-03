@@ -2123,6 +2123,27 @@ export const names = [
 		image: '105_3.jpg',
 	},
 	{
+		name: 'Solaris',
+		description: 'A tiny creature glowing like the morning sun, its playful nature is matched by the warmth it radiates.',
+		lore: 'Solaris emerges at dawn, spreading light and joy wherever it steps. Its presence is said to ward off shadows and inspire courage.',
+		stage: 1,
+		image: '106_1.jpg',
+	},
+	{
+		name: 'Solflare',
+		description: 'A radiant being surrounded by blazing orbs, its energy pulses with the intensity of a midday sun.',
+		lore: 'Solflare strides across sunlit plains, its dazzling light blinding foes and illuminating the path for allies.',
+		stage: 2,
+		image: '106_2.jpg',
+	},
+	{
+		name: 'Heliophis',
+		description: 'A majestic solar beast with an aura of brilliance, embodying the peak of celestial power.',
+		lore: 'Heliophis commands the heavens with its radiant form, its mere presence igniting the skies and dispelling darkness from the world.',
+		stage: 3,
+		image: '106_3.jpg',
+	},
+	{
 		name: 'Frostling',
 		description: 'A small, icy creature with sharp, crystalline spines protruding from its body. It exudes an aura of cold that can freeze anything it touches.',
 		lore: 'Frostlings are born from the harshest winters, living in the snow-covered mountains where only the toughest can survive. They are fast and nimble, using the cold to their advantage in combat.',
