@@ -1443,9 +1443,9 @@ export const names = [
 		image: '72_2.jpg',
 	},
 	{
-		name: 'Verdantra',
-		description: 'A majestic, sentient guardian adorned with radiant, flower-like appendages that shimmer with mystical energy.',
-		lore: 'Verdantras are enigmatic protectors of ancient forests, their origins shrouded in legends of forgotten worlds.',
+		name: 'Arcanflora',
+		description: 'A majestic, ethereal being adorned with shimmering petals that radiate an aura of ancient magic.',
+		lore: "Arcanfloras are embodiments of nature's hidden mysteries, their glowing forms whispering secrets of a forgotten world.",
 		stage: 3,
 		image: '72_3.jpg',
 	},
