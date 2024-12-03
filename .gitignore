@@ -13,3 +13,4 @@ vite.config.ts.timestamp-*
 /static/assets
 /static/spells
 /static/cards
+/scripts/*.txt
